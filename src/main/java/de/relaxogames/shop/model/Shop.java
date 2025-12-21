@@ -15,6 +15,7 @@ public class Shop {
     private int takeAmount;
     private int outputAmount;
     private UUID displayEntityId;
+    private String shopName;
 
     public Shop(Location signLocation, Location chestLocation, UUID owner) {
         this.signLocation = signLocation;
@@ -75,5 +76,13 @@ public class Shop {
 
     public void setDisplayEntityId(UUID displayEntityId) {
         this.displayEntityId = displayEntityId;
+    }
+
+    public String getShopName() {
+        return shopName;
+    }
+
+    public void setShopName(String shopName) {
+        this.shopName = shopName;
     }
 }

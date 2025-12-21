@@ -94,7 +94,11 @@ public class ShopGuiProvider {
 
     public void openOtherGui(Player player, Shop shop) {
         Inventory inv = createBaseGui(shop, 27, OTHER_GUI_TITLE);
-        inv.setItem(13, createGuiItem(Material.BARRIER, "Under Construction", NamedTextColor.RED));
+        
+        String currentName = shop.getShopName() != null ? shop.getShopName() : "None (Default)";
+        inv.setItem(13, createGuiItem(Material.NAME_TAG, "Set Shop Name", NamedTextColor.GOLD, 
+                "Current: " + currentName, "Click to change name in chat"));
+        
         inv.setItem(18, createBackItem());
         player.openInventory(inv);
     }

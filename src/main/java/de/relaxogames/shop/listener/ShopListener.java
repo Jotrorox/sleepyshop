@@ -4,8 +4,10 @@ import de.relaxogames.shop.gui.ShopGuiProvider;
 import de.relaxogames.shop.gui.ShopInventoryHolder;
 import de.relaxogames.shop.manager.ShopManager;
 import de.relaxogames.shop.model.Shop;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -18,16 +20,20 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class ShopListener implements Listener {
     private final ShopManager manager;
     private final ShopGuiProvider guiProvider;
+    private final Map<UUID, Shop> namingSession = new HashMap<>();
 
     public ShopListener(ShopManager manager) {
         this.manager = manager;
@@ -80,6 +86,22 @@ public class ShopListener implements Listener {
                     event.getPlayer().sendMessage(Component.text("This chest belongs to a shop!", NamedTextColor.RED));
                 }
                 return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        Inventory inv = event.getInventory();
+        if (inv.getHolder() instanceof org.bukkit.block.Container container) {
+            Block block = container.getBlock();
+            if (isChest(block)) {
+                for (Shop shop : manager.getShops().values()) {
+                    if (isSameChest(shop.getChestLocation().getBlock(), block)) {
+                        manager.updateDisplay(shop);
+                        return;
+                    }
+                }
             }
         }
     }
@@ -191,6 +213,11 @@ public class ShopListener implements Listener {
             }
         } else if (title.equals(ShopGuiProvider.OTHER_GUI_TITLE)) {
             if (slot == 18) guiProvider.openOwnerGui(player, shop);
+            else if (slot == 13) {
+                namingSession.put(player.getUniqueId(), shop);
+                player.closeInventory();
+                player.sendMessage(Component.text("Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):", NamedTextColor.YELLOW));
+            }
         }
     }
 
@@ -249,5 +276,32 @@ public class ShopListener implements Listener {
 
         buyer.sendMessage(Component.text("Purchase successful!", NamedTextColor.GREEN));
         buyer.closeInventory();
+        manager.updateDisplay(shop);
+    }
+
+    @EventHandler
+    public void onChat(AsyncChatEvent event) {
+        Player player = event.getPlayer();
+        Shop shop = namingSession.remove(player.getUniqueId());
+        if (shop == null) return;
+
+        event.setCancelled(true);
+        String name = PlainTextComponentSerializer.plainText().serialize(event.message());
+
+        if (name.equalsIgnoreCase("cancel")) {
+            player.sendMessage(Component.text("Shop naming cancelled.", NamedTextColor.RED));
+            return;
+        }
+
+        if (name.equalsIgnoreCase("reset")) {
+            shop.setShopName(null);
+            manager.saveShop(shop);
+            player.sendMessage(Component.text("Shop name reset to default.", NamedTextColor.GREEN));
+            return;
+        }
+
+        shop.setShopName(name);
+        manager.saveShop(shop);
+        player.sendMessage(Component.text("Shop name set to: " + name, NamedTextColor.GREEN));
     }
 }

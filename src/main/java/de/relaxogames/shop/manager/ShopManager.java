@@ -2,17 +2,19 @@ package de.relaxogames.shop.manager;
 
 import de.relaxogames.shop.model.Shop;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TextDisplay;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,11 +25,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ShopManager {
+    private final JavaPlugin plugin;
     private final File file;
     private final FileConfiguration config;
     private final Map<String, Shop> shops = new HashMap<>();
 
     public ShopManager(JavaPlugin plugin) {
+        this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "shops.yml");
         if (!file.exists()) {
             plugin.getDataFolder().mkdirs();
@@ -52,6 +56,7 @@ public class ShopManager {
             shop.setPaymentItem(section.getItemStack("paymentItem", new ItemStack(Material.DIAMOND)));
             shop.setTakeAmount(section.getInt("price"));
             shop.setOutputAmount(section.getInt("amount", 1));
+            shop.setShopName(section.getString("shopName"));
 
             String displayIdStr = section.getString("displayId");
             if (displayIdStr != null) {
@@ -74,6 +79,7 @@ public class ShopManager {
         config.set(id + ".paymentItem", shop.getPaymentItem());
         config.set(id + ".price", shop.getTakeAmount());
         config.set(id + ".amount", shop.getOutputAmount());
+        config.set(id + ".shopName", shop.getShopName());
         if (shop.getDisplayEntityId() != null) {
             config.set(id + ".displayId", shop.getDisplayEntityId().toString());
         }
@@ -138,18 +144,52 @@ public class ShopManager {
         String ownerName = Bukkit.getOfflinePlayer(shop.getOwner()).getName();
         if (ownerName == null) ownerName = "Unknown";
 
+        String shopName = shop.getShopName();
         String sellItemName = shop.getSellItem() != null ? shop.getSellItem().getType().name() : "None";
         String payItemName = shop.getPaymentItem() != null ? shop.getPaymentItem().getType().name() : "None";
 
-        Component text = Component.text()
-                .append(Component.text(ownerName + "'s Shop", NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+        // Stock check
+        boolean outOfStock = false;
+        if (shop.getSellItem() != null) {
+            Block chestBlock = shop.getChestLocation().getBlock();
+            if (chestBlock.getState() instanceof Chest chest) {
+                Inventory chestInv = chest.getInventory();
+                if (!chestInv.containsAtLeast(shop.getSellItem(), shop.getOutputAmount())) {
+                    outOfStock = true;
+                }
+            }
+        }
+
+        FileConfiguration pluginConfig = plugin.getConfig();
+        MiniMessage mm = MiniMessage.miniMessage();
+
+        String titleStr;
+        if (shopName != null && !shopName.isEmpty()) {
+            titleStr = pluginConfig.getString("shop-display.custom-title", "<gold><b>{shopname}</b>")
+                    .replace("{shopname}", shopName);
+        } else {
+            titleStr = pluginConfig.getString("shop-display.title", "<gold><b>{owner}'s Shop</b>")
+                    .replace("{owner}", ownerName);
+        }
+
+        Component title = mm.deserialize(titleStr);
+        Component selling = mm.deserialize(pluginConfig.getString("shop-display.selling", "<white>Selling: <green>{amount}x {item}")
+                .replace("{amount}", String.valueOf(shop.getOutputAmount()))
+                .replace("{item}", sellItemName));
+        Component price = mm.deserialize(pluginConfig.getString("shop-display.price", "<white>Price: <aqua>{price}x {payitem}")
+                .replace("{price}", String.valueOf(shop.getTakeAmount()))
+                .replace("{payitem}", payItemName));
+
+        Component text = title
                 .append(Component.newline())
-                .append(Component.text("Selling: ", NamedTextColor.WHITE))
-                .append(Component.text(shop.getOutputAmount() + "x " + sellItemName, NamedTextColor.GREEN))
+                .append(selling)
                 .append(Component.newline())
-                .append(Component.text("Price: ", NamedTextColor.WHITE))
-                .append(Component.text(shop.getTakeAmount() + "x " + payItemName, NamedTextColor.AQUA))
-                .build();
+                .append(price);
+
+        if (outOfStock) {
+            text = text.append(Component.newline())
+                    .append(mm.deserialize(pluginConfig.getString("shop-display.out-of-stock", "<red><b>OUT OF STOCK</b>")));
+        }
 
         display.text(text);
     }

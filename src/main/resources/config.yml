@@ -1,0 +1,19 @@
+# SleepyShop Configuration
+
+# The text displayed above the shop
+# Placeholders:
+# {owner} - Owner's name
+# {shopname} - Custom shop name (if set)
+# {item} - Item being sold
+# {amount} - Amount being sold
+# {price} - Price of the item
+# {payitem} - Item used for payment
+shop-display:
+  title: "<gold><b>{owner}'s Shop</b>"
+  custom-title: "<gold><b>{shopname}</b>"
+  selling: "<white>Selling: <green>{amount}x {item}"
+  price: "<white>Price: <aqua>{price}x {payitem}"
+  out-of-stock: "<red><b>OUT OF STOCK</b>"
+
+# Default shop name if none is set
+default-shop-name: "{owner}'s Shop"

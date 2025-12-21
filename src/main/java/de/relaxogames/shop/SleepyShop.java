@@ -12,6 +12,7 @@ public final class SleepyShop extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         this.shopManager = new ShopManager(this);
         Bukkit.getPluginManager().registerEvents(new ShopListener(shopManager), this);
         Bukkit.getPluginManager().registerEvents(new SignListener(shopManager), this);
