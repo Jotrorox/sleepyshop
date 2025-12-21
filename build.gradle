@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'de.relaxogames'
-version = '1.0'
+version = '0.1'
 
 repositories {
     mavenCentral()
@@ -16,8 +16,8 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
 }
-
 
 java {
     toolchain { languageVersion = JavaLanguageVersion.of(21) }

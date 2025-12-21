@@ -1,5 +1,6 @@
 package de.relaxogames.shop.manager;
 
+import de.relaxogames.shop.SleepyShop;
 import de.relaxogames.shop.model.Shop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -19,95 +20,82 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class ShopManager {
     private final JavaPlugin plugin;
-    private final File file;
-    private final FileConfiguration config;
     private final Map<String, Shop> shops = new HashMap<>();
 
     public ShopManager(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "shops.yml");
-        if (!file.exists()) {
-            plugin.getDataFolder().mkdirs();
-            try { file.createNewFile(); } catch (IOException e) { e.printStackTrace(); }
-        }
-        this.config = YamlConfiguration.loadConfiguration(file);
+        migrateIfNecessary();
         loadShops();
     }
 
-    private void loadShops() {
-        for (String key : config.getKeys(false)) {
-            ConfigurationSection section = config.getConfigurationSection(key);
-            if (section == null) continue;
+    private void migrateIfNecessary() {
+        File yamlFile = new File(plugin.getDataFolder(), "shops.yml");
+        if (yamlFile.exists()) {
+            plugin.getLogger().info("Found shops.yml, migrating to SQLite...");
+            FileConfiguration config = YamlConfiguration.loadConfiguration(yamlFile);
+            for (String key : config.getKeys(false)) {
+                ConfigurationSection section = config.getConfigurationSection(key);
+                if (section == null) continue;
 
-            Location signLoc = section.getLocation("sign");
-            Location chestLoc = section.getLocation("chest");
-            String ownerStr = section.getString("owner");
-            if (signLoc == null || chestLoc == null || ownerStr == null) continue;
+                Location signLoc = section.getLocation("sign");
+                Location chestLoc = section.getLocation("chest");
+                String ownerStr = section.getString("owner");
+                if (signLoc == null || chestLoc == null || ownerStr == null) continue;
 
-            Shop shop = new Shop(signLoc, chestLoc, UUID.fromString(ownerStr));
-            shop.setSellItem(section.getItemStack("item"));
-            shop.setPaymentItem(section.getItemStack("paymentItem", new ItemStack(Material.DIAMOND)));
-            shop.setTakeAmount(section.getInt("price"));
-            shop.setOutputAmount(section.getInt("amount", 1));
-            shop.setShopName(section.getString("shopName"));
-            shop.setShowDisplay(section.getBoolean("showDisplay", true));
-            shop.setShowStockMessage(section.getBoolean("showStockMessage", true));
+                Shop shop = new Shop(signLoc, chestLoc, UUID.fromString(ownerStr));
+                shop.setSellItem(section.getItemStack("item"));
+                shop.setPaymentItem(section.getItemStack("paymentItem", new ItemStack(Material.DIAMOND)));
+                shop.setTakeAmount(section.getInt("price"));
+                shop.setOutputAmount(section.getInt("amount", 1));
+                shop.setShopName(section.getString("shopName"));
+                shop.setShowDisplay(section.getBoolean("showDisplay", true));
+                shop.setShowStockMessage(section.getBoolean("showStockMessage", true));
 
-            String displayIdStr = section.getString("displayId");
-            if (displayIdStr != null) {
-                shop.setDisplayEntityId(UUID.fromString(displayIdStr));
+                String displayIdStr = section.getString("displayId");
+                if (displayIdStr != null) {
+                    shop.setDisplayEntityId(UUID.fromString(displayIdStr));
+                }
+
+                ((SleepyShop) plugin).getDatabaseManager().saveShop(shop).join();
             }
-            
-            shops.put(locationToString(signLoc), shop);
-            updateDisplay(shop);
+            yamlFile.renameTo(new File(plugin.getDataFolder(), "shops.yml.bak"));
+            plugin.getLogger().info("Migration complete! shops.yml renamed to shops.yml.bak");
         }
+    }
+
+    private void loadShops() {
+        ((SleepyShop) plugin).getDatabaseManager().loadShops().thenAccept(loadedShops -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                for (Shop shop : loadedShops) {
+                    shops.put(locationToString(shop.getSignLocation()), shop);
+                    updateDisplay(shop);
+                }
+            });
+        });
     }
 
     public void saveShop(Shop shop) {
-        if (!Bukkit.isPrimaryThread()) {
-            Bukkit.getScheduler().runTask(plugin, () -> saveShop(shop));
-            return;
-        }
         String id = locationToString(shop.getSignLocation());
         shops.put(id, shop);
-        
-        config.set(id + ".sign", shop.getSignLocation());
-        config.set(id + ".chest", shop.getChestLocation());
-        config.set(id + ".owner", shop.getOwner().toString());
-        config.set(id + ".item", shop.getSellItem());
-        config.set(id + ".paymentItem", shop.getPaymentItem());
-        config.set(id + ".price", shop.getTakeAmount());
-        config.set(id + ".amount", shop.getOutputAmount());
-        config.set(id + ".shopName", shop.getShopName());
-        config.set(id + ".showDisplay", shop.isShowDisplay());
-        config.set(id + ".showStockMessage", shop.isShowStockMessage());
-        if (shop.getDisplayEntityId() != null) {
-            config.set(id + ".displayId", shop.getDisplayEntityId().toString());
-        }
-        save();
-        updateDisplay(shop);
+        ((SleepyShop) plugin).getDatabaseManager().saveShop(shop).thenRun(() -> {
+            Bukkit.getScheduler().runTask(plugin, () -> updateDisplay(shop));
+        });
     }
 
     public void removeShop(Location signLoc) {
-        if (!Bukkit.isPrimaryThread()) {
-            Bukkit.getScheduler().runTask(plugin, () -> removeShop(signLoc));
-            return;
-        }
         String id = locationToString(signLoc);
         Shop shop = shops.remove(id);
         if (shop != null && shop.getDisplayEntityId() != null) {
             Entity entity = Bukkit.getEntity(shop.getDisplayEntityId());
             if (entity != null) entity.remove();
         }
-        config.set(id, null);
-        save();
+        ((SleepyShop) plugin).getDatabaseManager().removeShop(signLoc);
     }
 
     public void updateDisplay(Shop shop) {
@@ -126,9 +114,7 @@ public class ShopManager {
                 Entity entity = Bukkit.getEntity(shop.getDisplayEntityId());
                 if (entity != null) entity.remove();
                 shop.setDisplayEntityId(null);
-                String id = locationToString(shop.getSignLocation());
-                config.set(id + ".displayId", null);
-                save();
+                ((SleepyShop) plugin).getDatabaseManager().saveShop(shop);
             }
             return;
         }
@@ -148,10 +134,7 @@ public class ShopManager {
                 if (nearby instanceof TextDisplay td) {
                     display = td;
                     shop.setDisplayEntityId(display.getUniqueId());
-                    // Update config with the found ID
-                    String id = locationToString(shop.getSignLocation());
-                    config.set(id + ".displayId", shop.getDisplayEntityId().toString());
-                    save();
+                    ((SleepyShop) plugin).getDatabaseManager().saveShop(shop);
                     break;
                 }
             }
@@ -163,9 +146,7 @@ public class ShopManager {
             display.setBillboard(Display.Billboard.CENTER);
 
             // Save the displayId immediately
-            String id = locationToString(shop.getSignLocation());
-            config.set(id + ".displayId", shop.getDisplayEntityId().toString());
-            save();
+            ((SleepyShop) plugin).getDatabaseManager().saveShop(shop);
         } else {
             display.teleport(loc);
         }
@@ -240,7 +221,4 @@ public class ShopManager {
         return loc.getWorld().getName() + "_" + loc.getBlockX() + "_" + loc.getBlockY() + "_" + loc.getBlockZ();
     }
 
-    private void save() {
-        try { config.save(file); } catch (IOException e) { e.printStackTrace(); }
-    }
 }

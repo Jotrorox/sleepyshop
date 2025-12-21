@@ -1,7 +1,6 @@
 # SleepyShop Configuration
 
-# The text displayed above the shop
-# Placeholders:
+# The text displayed above the shop:
 # {owner} - Owner's name
 # {shopname} - Custom shop name (if set)
 # {item} - Item being sold
