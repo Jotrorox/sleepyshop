@@ -1,4 +1,4 @@
-package de.relaxogames.shop.model;
+package com.jotrorox.shop.model;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

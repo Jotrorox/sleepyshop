@@ -1,6 +1,6 @@
-package de.relaxogames.shop.gui;
+package com.jotrorox.shop.gui;
 
-import de.relaxogames.shop.model.Shop;
+import com.jotrorox.shop.model.Shop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;

@@ -1,7 +1,7 @@
-package de.relaxogames.shop.listener;
+package com.jotrorox.shop.listener;
 
-import de.relaxogames.shop.manager.ShopManager;
-import de.relaxogames.shop.model.Shop;
+import com.jotrorox.shop.manager.ShopManager;
+import com.jotrorox.shop.model.Shop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -9,8 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.type.HangingSign;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;

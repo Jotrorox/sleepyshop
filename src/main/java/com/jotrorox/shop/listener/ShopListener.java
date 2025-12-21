@@ -1,9 +1,9 @@
-package de.relaxogames.shop.listener;
+package com.jotrorox.shop.listener;
 
-import de.relaxogames.shop.gui.ShopGuiProvider;
-import de.relaxogames.shop.gui.ShopInventoryHolder;
-import de.relaxogames.shop.manager.ShopManager;
-import de.relaxogames.shop.model.Shop;
+import com.jotrorox.shop.gui.ShopGuiProvider;
+import com.jotrorox.shop.gui.ShopInventoryHolder;
+import com.jotrorox.shop.manager.ShopManager;
+import com.jotrorox.shop.model.Shop;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

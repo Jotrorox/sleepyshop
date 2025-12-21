@@ -1,6 +1,6 @@
-package de.relaxogames.shop.database;
+package com.jotrorox.shop.database;
 
-import de.relaxogames.shop.model.Shop;
+import com.jotrorox.shop.model.Shop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;

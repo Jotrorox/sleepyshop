@@ -1,7 +1,7 @@
-package de.relaxogames.shop.manager;
+package com.jotrorox.shop.manager;
 
-import de.relaxogames.shop.SleepyShop;
-import de.relaxogames.shop.model.Shop;
+import com.jotrorox.shop.SleepyShop;
+import com.jotrorox.shop.model.Shop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
