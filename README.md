@@ -47,4 +47,4 @@ shop-display:
 
 ---
 
-*Made with ❤️ by Johannes (Jotrorox) Müller*
+*Made with ❤️ by Johannes ([Jotrorox](https://jotrorox.com)) Müller*
