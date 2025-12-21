@@ -1,12 +1,11 @@
 package de.relaxogames.shop.listener;
 
 import de.relaxogames.shop.gui.ShopGuiProvider;
+import de.relaxogames.shop.gui.ShopInventoryHolder;
 import de.relaxogames.shop.manager.ShopManager;
 import de.relaxogames.shop.model.Shop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -17,23 +16,30 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class ShopListener implements Listener {
     private final ShopManager manager;
     private final ShopGuiProvider guiProvider;
-    private final Map<UUID, Location> openShopEditors = new HashMap<>();
 
     public ShopListener(ShopManager manager) {
         this.manager = manager;
         this.guiProvider = new ShopGuiProvider();
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) {
+        manager.getShops().values().stream()
+                .filter(shop -> shop.getChestLocation().getWorld().equals(event.getWorld()))
+                .filter(shop -> shop.getChestLocation().getBlockX() >> 4 == event.getChunk().getX() && shop.getChestLocation().getBlockZ() >> 4 == event.getChunk().getZ())
+                .forEach(manager::updateDisplay);
     }
 
     @EventHandler
@@ -100,70 +106,104 @@ public class ShopListener implements Listener {
         if (shop != null) {
             event.setCancelled(true);
             if (event.getPlayer().getUniqueId().equals(shop.getOwner())) {
-                openShopEditors.put(event.getPlayer().getUniqueId(), shop.getSignLocation());
                 guiProvider.openOwnerGui(event.getPlayer(), shop);
             } else {
-                openShopEditors.put(event.getPlayer().getUniqueId(), shop.getSignLocation());
                 guiProvider.openBuyerGui(event.getPlayer(), shop);
             }
         }
     }
 
     @EventHandler
-    public void onInventoryClose(org.bukkit.event.inventory.InventoryCloseEvent event) {
-        openShopEditors.remove(event.getPlayer().getUniqueId());
-    }
-
-    @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
-        if (!title.equals(ShopGuiProvider.OWNER_GUI_TITLE) && !title.equals(ShopGuiProvider.BUYER_GUI_TITLE)) return;
+        if (!(event.getInventory().getHolder() instanceof ShopInventoryHolder holder)) return;
 
-        event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
-        Location signLoc = openShopEditors.get(player.getUniqueId());
-        if (signLoc == null) return;
-        Shop shop = manager.getShop(signLoc);
-        if (shop == null) return;
+        Shop shop = holder.getShop();
+        String title = holder.getTitle();
 
-        if (title.equals(ShopGuiProvider.OWNER_GUI_TITLE)) {
-            handleOwnerClick(event, player, shop);
+        if (event.getClickedInventory() == event.getView().getTopInventory()) {
+            event.setCancelled(true);
+            if (title.equals(ShopGuiProvider.BUYER_GUI_TITLE)) {
+                handleBuyerClick(event, player, shop);
+            } else {
+                handleOwnerClick(event, player, shop, title);
+            }
         } else {
-            handleBuyerClick(event, player, shop);
+            // Bottom inventory click
+            if (title.equals(ShopGuiProvider.ITEMS_GUI_TITLE)) {
+                // Allow moving items in own inventory but prevent shift-clicking into shop GUI
+                if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                    event.setCancelled(true);
+                }
+            } else {
+                event.setCancelled(true);
+            }
         }
     }
 
-    private void handleOwnerClick(InventoryClickEvent event, Player player, Shop shop) {
+    private void handleOwnerClick(InventoryClickEvent event, Player player, Shop shop, String title) {
         int slot = event.getRawSlot();
-        if (slot == 13) { // Set item
-            ItemStack cursor = event.getCursor();
-            if (cursor != null && cursor.getType() != Material.AIR) {
-                ItemStack shopItem = cursor.clone();
-                shopItem.setAmount(1);
-                shop.setItem(shopItem);
-                manager.saveShop(shop);
-                player.sendMessage(Component.text("Item set to " + shopItem.getType().name(), NamedTextColor.GREEN));
-                guiProvider.openOwnerGui(player, shop);
+        
+        if (title.equals(ShopGuiProvider.OWNER_GUI_TITLE)) {
+            if (slot == 11) guiProvider.openPriceGui(player, shop);
+            else if (slot == 13) guiProvider.openItemsGui(player, shop);
+            else if (slot == 15) guiProvider.openOtherGui(player, shop);
+            else if (slot == 26) { // Disband
+                manager.removeShop(shop.getSignLocation());
+                shop.getSignLocation().getBlock().setType(Material.AIR);
+                player.closeInventory();
+                player.sendMessage(Component.text("SleepyShop disbanded.", NamedTextColor.YELLOW));
             }
-        } else if (slot == 10) { shop.setPrice(Math.max(0, shop.getPrice() - 10)); manager.saveShop(shop); guiProvider.openOwnerGui(player, shop);
-        } else if (slot == 11) { shop.setPrice(Math.max(0, shop.getPrice() - 1)); manager.saveShop(shop); guiProvider.openOwnerGui(player, shop);
-        } else if (slot == 14) { shop.setPrice(shop.getPrice() + 1); manager.saveShop(shop); guiProvider.openOwnerGui(player, shop);
-        } else if (slot == 15) { shop.setPrice(shop.getPrice() + 10); manager.saveShop(shop); guiProvider.openOwnerGui(player, shop);
-        } else if (slot == 21) { 
-            int newAmount = shop.getAmount() == 64 ? 1 : Math.min(64, shop.getAmount() + 1);
-            if (event.isLeftClick()) {
-                shop.setAmount(newAmount);
-            } else {
-                shop.setAmount(Math.max(1, shop.getAmount() - 1));
+        } else if (title.equals(ShopGuiProvider.PRICE_GUI_TITLE)) {
+            if (slot == 18) guiProvider.openOwnerGui(player, shop);
+            // Take Amount
+            else if (slot == 10) adjustTakeAmount(shop, -10, player);
+            else if (slot == 11) adjustTakeAmount(shop, -1, player);
+            else if (slot == 13) adjustTakeAmount(shop, 1, player);
+            else if (slot == 14) adjustTakeAmount(shop, 10, player);
+            // Output Amount
+            else if (slot == 19) adjustOutputAmount(shop, -10, player);
+            else if (slot == 20) adjustOutputAmount(shop, -1, player);
+            else if (slot == 22) adjustOutputAmount(shop, 1, player);
+            else if (slot == 23) adjustOutputAmount(shop, 10, player);
+        } else if (title.equals(ShopGuiProvider.ITEMS_GUI_TITLE)) {
+            if (slot == 18) guiProvider.openOwnerGui(player, shop);
+            else if (slot == 11) { // Sell Item
+                ItemStack cursor = event.getCursor();
+                if (cursor != null && cursor.getType() != Material.AIR) {
+                    ItemStack shopItem = cursor.clone();
+                    shopItem.setAmount(1);
+                    shop.setSellItem(shopItem);
+                    manager.saveShop(shop);
+                    player.sendMessage(Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN));
+                    guiProvider.openItemsGui(player, shop);
+                }
+            } else if (slot == 15) { // Payment Item
+                ItemStack cursor = event.getCursor();
+                if (cursor != null && cursor.getType() != Material.AIR) {
+                    ItemStack payItem = cursor.clone();
+                    payItem.setAmount(1);
+                    shop.setPaymentItem(payItem);
+                    manager.saveShop(shop);
+                    player.sendMessage(Component.text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN));
+                    guiProvider.openItemsGui(player, shop);
+                }
             }
-            manager.saveShop(shop);
-            guiProvider.openOwnerGui(player, shop);
-        } else if (slot == 26) { // Disband
-            manager.removeShop(shop.getSignLocation());
-            shop.getSignLocation().getBlock().setType(Material.AIR);
-            player.closeInventory();
-            player.sendMessage(Component.text("SleepyShop disbanded.", NamedTextColor.YELLOW));
+        } else if (title.equals(ShopGuiProvider.OTHER_GUI_TITLE)) {
+            if (slot == 18) guiProvider.openOwnerGui(player, shop);
         }
+    }
+
+    private void adjustTakeAmount(Shop shop, int delta, Player player) {
+        shop.setTakeAmount(Math.max(0, shop.getTakeAmount() + delta));
+        manager.saveShop(shop);
+        guiProvider.openPriceGui(player, shop);
+    }
+
+    private void adjustOutputAmount(Shop shop, int delta, Player player) {
+        shop.setOutputAmount(Math.max(1, Math.min(64, shop.getOutputAmount() + delta)));
+        manager.saveShop(shop);
+        guiProvider.openPriceGui(player, shop);
     }
 
     private void handleBuyerClick(InventoryClickEvent event, Player player, Shop shop) {
@@ -173,7 +213,7 @@ public class ShopListener implements Listener {
     }
 
     private void performTransaction(Player buyer, Shop shop) {
-        if (shop.getItem() == null) return;
+        if (shop.getSellItem() == null) return;
 
         Block chestBlock = shop.getChestLocation().getBlock();
         if (!(chestBlock.getState() instanceof Chest chest)) {
@@ -182,27 +222,28 @@ public class ShopListener implements Listener {
         }
 
         Inventory chestInv = chest.getInventory();
-        if (!chestInv.containsAtLeast(shop.getItem(), shop.getAmount())) {
+        if (!chestInv.containsAtLeast(shop.getSellItem(), shop.getOutputAmount())) {
             buyer.sendMessage(Component.text("Shop is out of stock!", NamedTextColor.RED));
             return;
         }
 
-        // Check buyer's payment (Diamonds)
-        ItemStack payment = new ItemStack(Material.DIAMOND, (int) shop.getPrice());
-        if (shop.getPrice() > 0 && !buyer.getInventory().containsAtLeast(payment, (int) shop.getPrice())) {
-            buyer.sendMessage(Component.text("You don't have enough Diamonds!", NamedTextColor.RED));
+        // Check buyer's payment
+        ItemStack payment = shop.getPaymentItem().clone();
+        payment.setAmount(shop.getTakeAmount());
+        if (shop.getTakeAmount() > 0 && !buyer.getInventory().containsAtLeast(payment, shop.getTakeAmount())) {
+            buyer.sendMessage(Component.text("You don't have enough " + payment.getType().name() + "!", NamedTextColor.RED));
             return;
         }
 
         // Transaction
-        if (shop.getPrice() > 0) {
+        if (shop.getTakeAmount() > 0) {
             buyer.getInventory().removeItem(payment);
             chestInv.addItem(payment);
         }
 
         // Remove item from chest and give to buyer
-        ItemStack toGive = shop.getItem().clone();
-        toGive.setAmount(shop.getAmount());
+        ItemStack toGive = shop.getSellItem().clone();
+        toGive.setAmount(shop.getOutputAmount());
         chestInv.removeItem(toGive);
         buyer.getInventory().addItem(toGive).values().forEach(item -> buyer.getWorld().dropItem(buyer.getLocation(), item));
 

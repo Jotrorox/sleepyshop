@@ -1,6 +1,7 @@
 package de.relaxogames.shop.model;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
@@ -9,16 +10,19 @@ public class Shop {
     private final Location signLocation;
     private final Location chestLocation;
     private final UUID owner;
-    private ItemStack item;
-    private double price;
-    private int amount;
+    private ItemStack sellItem;
+    private ItemStack paymentItem;
+    private int takeAmount;
+    private int outputAmount;
+    private UUID displayEntityId;
 
     public Shop(Location signLocation, Location chestLocation, UUID owner) {
         this.signLocation = signLocation;
         this.chestLocation = chestLocation;
         this.owner = owner;
-        this.price = 0;
-        this.amount = 1;
+        this.takeAmount = 0;
+        this.outputAmount = 1;
+        this.paymentItem = new ItemStack(Material.DIAMOND);
     }
 
     public Location getSignLocation() {
@@ -33,27 +37,43 @@ public class Shop {
         return owner;
     }
 
-    public ItemStack getItem() {
-        return item;
+    public ItemStack getSellItem() {
+        return sellItem;
     }
 
-    public void setItem(ItemStack item) {
-        this.item = item;
+    public void setSellItem(ItemStack item) {
+        this.sellItem = item;
     }
 
-    public double getPrice() {
-        return price;
+    public ItemStack getPaymentItem() {
+        return paymentItem;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setPaymentItem(ItemStack paymentItem) {
+        this.paymentItem = paymentItem;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getTakeAmount() {
+        return takeAmount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setTakeAmount(int takeAmount) {
+        this.takeAmount = takeAmount;
+    }
+
+    public int getOutputAmount() {
+        return outputAmount;
+    }
+
+    public void setOutputAmount(int amount) {
+        this.outputAmount = amount;
+    }
+
+    public UUID getDisplayEntityId() {
+        return displayEntityId;
+    }
+
+    public void setDisplayEntityId(UUID displayEntityId) {
+        this.displayEntityId = displayEntityId;
     }
 }
