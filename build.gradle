@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id("com.gradleup.shadow") version "9.3.0"
+}
+
+group = 'de.relaxogames'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+}
+
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+
+configurations {
+    shadow
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release.set(21)
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') { expand props }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    // Service-Dateien unter META-INF/services werden automatisch zusammengeführt
+    mergeServiceFiles()
+
+    // Problematische META-INF-Dateien von Signaturen und Zertifikaten ausschließen
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    // Optional: Manifest selbst definieren, um Konflikte zu vermeiden
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version
+        )
+    }
+}
