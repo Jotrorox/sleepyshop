@@ -34,6 +34,7 @@ public class ShopListener implements Listener {
     private final ShopManager manager;
     private final ShopGuiProvider guiProvider;
     private final Map<UUID, Shop> namingSession = new HashMap<>();
+    private static final Component PREFIX = Component.text("[SleepyShop] ", NamedTextColor.BLUE);
 
     public ShopListener(ShopManager manager) {
         this.manager = manager;
@@ -55,17 +56,17 @@ public class ShopListener implements Listener {
             Shop shop = manager.getShop(loc);
             if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(Component.text("You cannot break this shop!", NamedTextColor.RED));
+                event.getPlayer().sendMessage(PREFIX.append(Component.text("You cannot break this shop!", NamedTextColor.RED)));
             } else {
                 manager.removeShop(loc);
-                event.getPlayer().sendMessage(Component.text("SleepyShop removed.", NamedTextColor.YELLOW));
+                event.getPlayer().sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
             }
         } else if (isChest(event.getBlock())) {
             for (Shop shop : manager.getShops().values()) {
                 if (isSameChest(shop.getChestLocation().getBlock(), event.getBlock())) {
                     if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
                         event.setCancelled(true);
-                        event.getPlayer().sendMessage(Component.text("This chest belongs to a shop!", NamedTextColor.RED));
+                        event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
                     }
                     return;
                 }
@@ -83,7 +84,7 @@ public class ShopListener implements Listener {
             if (isSameChest(shop.getChestLocation().getBlock(), block)) {
                 if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
                     event.setCancelled(true);
-                    event.getPlayer().sendMessage(Component.text("This chest belongs to a shop!", NamedTextColor.RED));
+                    event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
                 }
                 return;
             }
@@ -174,20 +175,20 @@ public class ShopListener implements Listener {
                 manager.removeShop(shop.getSignLocation());
                 shop.getSignLocation().getBlock().setType(Material.AIR);
                 player.closeInventory();
-                player.sendMessage(Component.text("SleepyShop disbanded.", NamedTextColor.YELLOW));
+                player.sendMessage(PREFIX.append(Component.text("SleepyShop disbanded.", NamedTextColor.YELLOW)));
             }
         } else if (title.equals(ShopGuiProvider.PRICE_GUI_TITLE)) {
-            if (slot == 18) guiProvider.openOwnerGui(player, shop);
-            // Take Amount
+            if (slot == 31) guiProvider.openOwnerGui(player, shop);
+            // Price (Take Amount)
             else if (slot == 10) adjustTakeAmount(shop, -10, player);
             else if (slot == 11) adjustTakeAmount(shop, -1, player);
-            else if (slot == 13) adjustTakeAmount(shop, 1, player);
-            else if (slot == 14) adjustTakeAmount(shop, 10, player);
-            // Output Amount
+            else if (slot == 15) adjustTakeAmount(shop, 1, player);
+            else if (slot == 16) adjustTakeAmount(shop, 10, player);
+            // Amount (Output Amount)
             else if (slot == 19) adjustOutputAmount(shop, -10, player);
             else if (slot == 20) adjustOutputAmount(shop, -1, player);
-            else if (slot == 22) adjustOutputAmount(shop, 1, player);
-            else if (slot == 23) adjustOutputAmount(shop, 10, player);
+            else if (slot == 24) adjustOutputAmount(shop, 1, player);
+            else if (slot == 25) adjustOutputAmount(shop, 10, player);
         } else if (title.equals(ShopGuiProvider.ITEMS_GUI_TITLE)) {
             if (slot == 18) guiProvider.openOwnerGui(player, shop);
             else if (slot == 11) { // Sell Item
@@ -197,7 +198,7 @@ public class ShopListener implements Listener {
                     shopItem.setAmount(1);
                     shop.setSellItem(shopItem);
                     manager.saveShop(shop);
-                    player.sendMessage(Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN));
+                    player.sendMessage(PREFIX.append(Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN)));
                     guiProvider.openItemsGui(player, shop);
                 }
             } else if (slot == 15) { // Payment Item
@@ -207,7 +208,7 @@ public class ShopListener implements Listener {
                     payItem.setAmount(1);
                     shop.setPaymentItem(payItem);
                     manager.saveShop(shop);
-                    player.sendMessage(Component.text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN));
+                    player.sendMessage(PREFIX.append(Component.text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN)));
                     guiProvider.openItemsGui(player, shop);
                 }
             }
@@ -216,7 +217,15 @@ public class ShopListener implements Listener {
             else if (slot == 13) {
                 namingSession.put(player.getUniqueId(), shop);
                 player.closeInventory();
-                player.sendMessage(Component.text("Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):", NamedTextColor.YELLOW));
+                player.sendMessage(PREFIX.append(Component.text("Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):", NamedTextColor.YELLOW)));
+            } else if (slot == 11) { // Toggle Hologram
+                shop.setShowDisplay(!shop.isShowDisplay());
+                manager.saveShop(shop);
+                guiProvider.openOtherGui(player, shop);
+            } else if (slot == 15) { // Toggle Stock Warning
+                shop.setShowStockMessage(!shop.isShowStockMessage());
+                manager.saveShop(shop);
+                guiProvider.openOtherGui(player, shop);
             }
         }
     }
@@ -244,13 +253,13 @@ public class ShopListener implements Listener {
 
         Block chestBlock = shop.getChestLocation().getBlock();
         if (!(chestBlock.getState() instanceof Chest chest)) {
-            buyer.sendMessage(Component.text("Error: Chest not found!", NamedTextColor.RED));
+            buyer.sendMessage(PREFIX.append(Component.text("Error: Chest not found!", NamedTextColor.RED)));
             return;
         }
 
         Inventory chestInv = chest.getInventory();
         if (!chestInv.containsAtLeast(shop.getSellItem(), shop.getOutputAmount())) {
-            buyer.sendMessage(Component.text("Shop is out of stock!", NamedTextColor.RED));
+            buyer.sendMessage(PREFIX.append(Component.text("Shop is out of stock!", NamedTextColor.RED)));
             return;
         }
 
@@ -258,7 +267,7 @@ public class ShopListener implements Listener {
         ItemStack payment = shop.getPaymentItem().clone();
         payment.setAmount(shop.getTakeAmount());
         if (shop.getTakeAmount() > 0 && !buyer.getInventory().containsAtLeast(payment, shop.getTakeAmount())) {
-            buyer.sendMessage(Component.text("You don't have enough " + payment.getType().name() + "!", NamedTextColor.RED));
+            buyer.sendMessage(PREFIX.append(Component.text("You don't have enough " + payment.getType().name() + "!", NamedTextColor.RED)));
             return;
         }
 
@@ -274,7 +283,7 @@ public class ShopListener implements Listener {
         chestInv.removeItem(toGive);
         buyer.getInventory().addItem(toGive).values().forEach(item -> buyer.getWorld().dropItem(buyer.getLocation(), item));
 
-        buyer.sendMessage(Component.text("Purchase successful!", NamedTextColor.GREEN));
+        buyer.sendMessage(PREFIX.append(Component.text("Purchase successful!", NamedTextColor.GREEN)));
         buyer.closeInventory();
         manager.updateDisplay(shop);
     }
@@ -289,19 +298,19 @@ public class ShopListener implements Listener {
         String name = PlainTextComponentSerializer.plainText().serialize(event.message());
 
         if (name.equalsIgnoreCase("cancel")) {
-            player.sendMessage(Component.text("Shop naming cancelled.", NamedTextColor.RED));
+            player.sendMessage(PREFIX.append(Component.text("Shop naming cancelled.", NamedTextColor.RED)));
             return;
         }
 
         if (name.equalsIgnoreCase("reset")) {
             shop.setShopName(null);
             manager.saveShop(shop);
-            player.sendMessage(Component.text("Shop name reset to default.", NamedTextColor.GREEN));
+            player.sendMessage(PREFIX.append(Component.text("Shop name reset to default.", NamedTextColor.GREEN)));
             return;
         }
 
         shop.setShopName(name);
         manager.saveShop(shop);
-        player.sendMessage(Component.text("Shop name set to: " + name, NamedTextColor.GREEN));
+        player.sendMessage(PREFIX.append(Component.text("Shop name set to: " + name, NamedTextColor.GREEN)));
     }
 }

@@ -22,6 +22,8 @@ public class ShopGuiProvider {
     public static final String OTHER_GUI_TITLE = "Other Settings";
     public static final String BUYER_GUI_TITLE = "Purchase Item";
 
+    private static final Component PREFIX = Component.text("[SleepyShop] ", NamedTextColor.BLUE);
+
     public void openOwnerGui(Player player, Shop shop) {
         Inventory inv = createBaseGui(shop, 27, OWNER_GUI_TITLE);
 
@@ -35,23 +37,35 @@ public class ShopGuiProvider {
     }
 
     public void openPriceGui(Player player, Shop shop) {
-        Inventory inv = createBaseGui(shop, 27, PRICE_GUI_TITLE);
+        Inventory inv = createBaseGui(shop, 36, PRICE_GUI_TITLE);
 
-        // Take Amount (-10, -1, current, +1, +10)
-        inv.setItem(10, createGuiItem(Material.RED_TERRACOTTA, "-10 Take Amount", NamedTextColor.RED));
-        inv.setItem(11, createGuiItem(Material.PINK_TERRACOTTA, "-1 Take Amount", NamedTextColor.LIGHT_PURPLE));
-        inv.setItem(12, createGuiItem(Material.HOPPER, "Takes: " + shop.getTakeAmount(), NamedTextColor.YELLOW));
-        inv.setItem(13, createGuiItem(Material.LIME_TERRACOTTA, "+1 Take Amount", NamedTextColor.GREEN));
-        inv.setItem(14, createGuiItem(Material.GREEN_TERRACOTTA, "+10 Take Amount", NamedTextColor.DARK_GREEN));
+        // Take Amount (Price) - Row 1
+        inv.setItem(10, createGuiItem(Material.RED_STAINED_GLASS_PANE, "-10 Price", NamedTextColor.RED));
+        inv.setItem(11, createGuiItem(Material.PINK_STAINED_GLASS_PANE, "-1 Price", NamedTextColor.LIGHT_PURPLE));
+        
+        ItemStack priceStatus = createGuiItem(Material.GOLD_INGOT, "Current Price: " + shop.getTakeAmount(), NamedTextColor.GOLD);
+        ItemMeta priceMeta = priceStatus.getItemMeta();
+        priceMeta.lore(List.of(Component.text("This is what buyers pay per purchase", NamedTextColor.GRAY)));
+        priceStatus.setItemMeta(priceMeta);
+        inv.setItem(13, priceStatus);
+        
+        inv.setItem(15, createGuiItem(Material.LIME_STAINED_GLASS_PANE, "+1 Price", NamedTextColor.GREEN));
+        inv.setItem(16, createGuiItem(Material.GREEN_STAINED_GLASS_PANE, "+10 Price", NamedTextColor.DARK_GREEN));
 
-        // Output Amount (-10, -1, current, +1, +10)
-        inv.setItem(19, createGuiItem(Material.RED_TERRACOTTA, "-10 Output Amount", NamedTextColor.RED));
-        inv.setItem(20, createGuiItem(Material.PINK_TERRACOTTA, "-1 Output Amount", NamedTextColor.LIGHT_PURPLE));
-        inv.setItem(21, createGuiItem(Material.DISPENSER, "Outputs: " + shop.getOutputAmount(), NamedTextColor.YELLOW));
-        inv.setItem(22, createGuiItem(Material.LIME_TERRACOTTA, "+1 Output Amount", NamedTextColor.GREEN));
-        inv.setItem(23, createGuiItem(Material.GREEN_TERRACOTTA, "+10 Output Amount", NamedTextColor.DARK_GREEN));
+        // Output Amount - Row 2
+        inv.setItem(19, createGuiItem(Material.RED_STAINED_GLASS_PANE, "-10 Amount", NamedTextColor.RED));
+        inv.setItem(20, createGuiItem(Material.PINK_STAINED_GLASS_PANE, "-1 Amount", NamedTextColor.LIGHT_PURPLE));
+        
+        ItemStack amountStatus = createGuiItem(Material.CHEST, "Current Amount: " + shop.getOutputAmount(), NamedTextColor.AQUA);
+        ItemMeta amountMeta = amountStatus.getItemMeta();
+        amountMeta.lore(List.of(Component.text("This is what buyers receive per purchase", NamedTextColor.GRAY)));
+        amountStatus.setItemMeta(amountMeta);
+        inv.setItem(22, amountStatus);
+        
+        inv.setItem(24, createGuiItem(Material.LIME_STAINED_GLASS_PANE, "+1 Amount", NamedTextColor.GREEN));
+        inv.setItem(25, createGuiItem(Material.GREEN_STAINED_GLASS_PANE, "+10 Amount", NamedTextColor.DARK_GREEN));
 
-        inv.setItem(18, createBackItem());
+        inv.setItem(31, createBackItem());
         player.openInventory(inv);
     }
 
@@ -95,9 +109,22 @@ public class ShopGuiProvider {
     public void openOtherGui(Player player, Shop shop) {
         Inventory inv = createBaseGui(shop, 27, OTHER_GUI_TITLE);
         
+        // Shop Name
         String currentName = shop.getShopName() != null ? shop.getShopName() : "None (Default)";
         inv.setItem(13, createGuiItem(Material.NAME_TAG, "Set Shop Name", NamedTextColor.GOLD, 
                 "Current: " + currentName, "Click to change name in chat"));
+
+        // Toggle Hologram
+        Material holoMaterial = shop.isShowDisplay() ? Material.LIME_DYE : Material.GRAY_DYE;
+        String holoStatus = shop.isShowDisplay() ? "Enabled" : "Disabled";
+        inv.setItem(11, createGuiItem(holoMaterial, "Floating Text", NamedTextColor.YELLOW,
+                "Status: " + holoStatus, "Click to toggle shop display"));
+
+        // Toggle Stock Warning
+        Material stockMaterial = shop.isShowStockMessage() ? Material.PAPER : Material.BARRIER;
+        String stockStatus = shop.isShowStockMessage() ? "Enabled" : "Disabled";
+        inv.setItem(15, createGuiItem(stockMaterial, "Out of Stock Warning", NamedTextColor.YELLOW,
+                "Status: " + stockStatus, "Click to toggle 'OUT OF STOCK' message"));
         
         inv.setItem(18, createBackItem());
         player.openInventory(inv);
@@ -107,7 +134,7 @@ public class ShopGuiProvider {
         Inventory inv = createBaseGui(shop, 9, BUYER_GUI_TITLE);
 
         if (shop.getSellItem() == null) {
-            player.sendMessage(Component.text("This shop is not configured yet!", NamedTextColor.RED));
+            player.sendMessage(PREFIX.append(Component.text("This shop is not configured yet!", NamedTextColor.RED)));
             player.closeInventory();
             return;
         }

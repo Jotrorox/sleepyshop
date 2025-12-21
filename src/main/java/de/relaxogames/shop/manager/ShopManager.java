@@ -57,6 +57,8 @@ public class ShopManager {
             shop.setTakeAmount(section.getInt("price"));
             shop.setOutputAmount(section.getInt("amount", 1));
             shop.setShopName(section.getString("shopName"));
+            shop.setShowDisplay(section.getBoolean("showDisplay", true));
+            shop.setShowStockMessage(section.getBoolean("showStockMessage", true));
 
             String displayIdStr = section.getString("displayId");
             if (displayIdStr != null) {
@@ -69,6 +71,10 @@ public class ShopManager {
     }
 
     public void saveShop(Shop shop) {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(plugin, () -> saveShop(shop));
+            return;
+        }
         String id = locationToString(shop.getSignLocation());
         shops.put(id, shop);
         
@@ -80,6 +86,8 @@ public class ShopManager {
         config.set(id + ".price", shop.getTakeAmount());
         config.set(id + ".amount", shop.getOutputAmount());
         config.set(id + ".shopName", shop.getShopName());
+        config.set(id + ".showDisplay", shop.isShowDisplay());
+        config.set(id + ".showStockMessage", shop.isShowStockMessage());
         if (shop.getDisplayEntityId() != null) {
             config.set(id + ".displayId", shop.getDisplayEntityId().toString());
         }
@@ -88,6 +96,10 @@ public class ShopManager {
     }
 
     public void removeShop(Location signLoc) {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(plugin, () -> removeShop(signLoc));
+            return;
+        }
         String id = locationToString(signLoc);
         Shop shop = shops.remove(id);
         if (shop != null && shop.getDisplayEntityId() != null) {
@@ -99,10 +111,27 @@ public class ShopManager {
     }
 
     public void updateDisplay(Shop shop) {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(plugin, () -> updateDisplay(shop));
+            return;
+        }
+
         if (shop.getChestLocation() == null || shop.getChestLocation().getWorld() == null) return;
         
         Location loc = shop.getChestLocation().clone().add(0.5, 1.2, 0.5);
         if (!loc.isChunkLoaded()) return;
+
+        if (!shop.isShowDisplay()) {
+            if (shop.getDisplayEntityId() != null) {
+                Entity entity = Bukkit.getEntity(shop.getDisplayEntityId());
+                if (entity != null) entity.remove();
+                shop.setDisplayEntityId(null);
+                String id = locationToString(shop.getSignLocation());
+                config.set(id + ".displayId", null);
+                save();
+            }
+            return;
+        }
 
         TextDisplay display = null;
 
@@ -186,7 +215,7 @@ public class ShopManager {
                 .append(Component.newline())
                 .append(price);
 
-        if (outOfStock) {
+        if (outOfStock && shop.isShowStockMessage()) {
             text = text.append(Component.newline())
                     .append(mm.deserialize(pluginConfig.getString("shop-display.out-of-stock", "<red><b>OUT OF STOCK</b>")));
         }

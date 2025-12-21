@@ -16,6 +16,8 @@ public class Shop {
     private int outputAmount;
     private UUID displayEntityId;
     private String shopName;
+    private boolean showDisplay = true;
+    private boolean showStockMessage = true;
 
     public Shop(Location signLocation, Location chestLocation, UUID owner) {
         this.signLocation = signLocation;
@@ -84,5 +86,21 @@ public class Shop {
 
     public void setShopName(String shopName) {
         this.shopName = shopName;
+    }
+
+    public boolean isShowDisplay() {
+        return showDisplay;
+    }
+
+    public void setShowDisplay(boolean showDisplay) {
+        this.showDisplay = showDisplay;
+    }
+
+    public boolean isShowStockMessage() {
+        return showStockMessage;
+    }
+
+    public void setShowStockMessage(boolean showStockMessage) {
+        this.showStockMessage = showStockMessage;
     }
 }

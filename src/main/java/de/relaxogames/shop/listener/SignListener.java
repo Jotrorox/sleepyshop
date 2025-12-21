@@ -17,6 +17,7 @@ import org.bukkit.event.block.SignChangeEvent;
 
 public class SignListener implements Listener {
     private final ShopManager manager;
+    private static final Component PREFIX = Component.text("[SleepyShop] ", NamedTextColor.BLUE);
 
     public SignListener(ShopManager manager) {
         this.manager = manager;
@@ -30,7 +31,7 @@ public class SignListener implements Listener {
             Block chestBlock = findAttachedChest(signBlock);
 
             if (chestBlock == null) {
-                event.getPlayer().sendMessage(Component.text("No chest found nearby!", NamedTextColor.RED));
+                event.getPlayer().sendMessage(PREFIX.append(Component.text("No chest found nearby!", NamedTextColor.RED)));
                 return;
             }
 
@@ -38,7 +39,7 @@ public class SignListener implements Listener {
             manager.saveShop(shop);
 
             event.line(0, Component.text("[SleepyShop]", NamedTextColor.BLUE));
-            event.getPlayer().sendMessage(Component.text("SleepyShop created!", NamedTextColor.GREEN));
+            event.getPlayer().sendMessage(PREFIX.append(Component.text("SleepyShop created!", NamedTextColor.GREEN)));
         }
     }
 
