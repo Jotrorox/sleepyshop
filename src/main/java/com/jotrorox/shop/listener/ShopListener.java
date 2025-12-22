@@ -82,6 +82,9 @@ public class ShopListener implements Listener {
                 if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
                     event.setCancelled(true);
                     event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
+                } else {
+                    manager.removeShop(associatedShop.getSignLocation());
+                    event.getPlayer().sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
                 }
             } else {
                 event.setCancelled(true);
