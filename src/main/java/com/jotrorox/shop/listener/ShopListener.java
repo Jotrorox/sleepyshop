@@ -54,7 +54,9 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        Location loc = event.getBlock().getLocation();
+        Block block = event.getBlock();
+        Location loc = block.getLocation();
+
         if (manager.isShopSign(loc)) {
             Shop shop = manager.getShop(loc);
             if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
@@ -64,15 +66,26 @@ public class ShopListener implements Listener {
                 manager.removeShop(loc);
                 event.getPlayer().sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
             }
-        } else if (isChest(event.getBlock())) {
+            return;
+        }
+
+        if (manager.isShopBlock(block)) {
+            Shop associatedShop = null;
             for (Shop shop : manager.getShops().values()) {
-                if (isSameChest(shop.getChestLocation().getBlock(), event.getBlock())) {
-                    if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
-                        event.setCancelled(true);
-                        event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
-                    }
-                    return;
+                if (isSameChest(shop.getChestLocation().getBlock(), block)) {
+                    associatedShop = shop;
+                    break;
                 }
+            }
+
+            if (associatedShop != null) {
+                if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
+                    event.setCancelled(true);
+                    event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
+                }
+            } else {
+                event.setCancelled(true);
+                event.getPlayer().sendMessage(PREFIX.append(Component.text("This block is protected by a shop!", NamedTextColor.RED)));
             }
         }
     }
