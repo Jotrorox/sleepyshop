@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -182,23 +184,39 @@ public class ShopManager {
     }
 
     public boolean isShopBlock(Block block) {
+        // 1. Check if it's the sign itself
         if (isShopSign(block.getLocation())) return true;
 
-        for (Shop shop : shops.values()) {
-            Block shopChestBlock = shop.getChestLocation().getBlock();
-            if (isSameChest(shopChestBlock, block)) {
-                return true;
+        // 2. Check if it's a container
+        Material type = block.getType();
+        if (type == Material.CHEST || type == Material.TRAPPED_CHEST || type == Material.BARREL) {
+            for (Shop shop : shops.values()) {
+                if (shop.getChestLocation() == null) continue;
+
+                // Use the improved helper to check if this block belongs to this shop
+                if (isSameChest(shop.getChestLocation(), block)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    private boolean isSameChest(Block shopChest, Block target) {
-        if (shopChest.equals(target)) return true;
-        if (shopChest.getState() instanceof Chest c1 && target.getState() instanceof Chest c2) {
-            return c1.getInventory().equals(c2.getInventory());
+    private boolean isSameChest(Location shopChestLoc, Block targetBlock) {
+        // Direct match
+        if (shopChestLoc.equals(targetBlock.getLocation())) return true;
+
+        // Double chest logic
+        if (targetBlock.getState() instanceof Chest chest) {
+            InventoryHolder holder = chest.getInventory().getHolder();
+            if (holder instanceof DoubleChest doubleChest) {
+                // Check both sides of the double chest against the saved shop location
+                Location leftLoc = ((Chest) doubleChest.getLeftSide()).getLocation();
+                Location rightLoc = ((Chest) doubleChest.getRightSide()).getLocation();
+
+                return shopChestLoc.equals(leftLoc) || shopChestLoc.equals(rightLoc);
+            }
         }
         return false;
     }
-
 }
