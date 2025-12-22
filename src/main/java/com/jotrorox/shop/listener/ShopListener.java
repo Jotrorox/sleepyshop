@@ -10,9 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,9 +21,11 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -337,5 +337,34 @@ public class ShopListener implements Listener {
                 iterator.remove();
             }
         }
+    }
+
+    @EventHandler
+    public void onHopperTransfer(InventoryMoveItemEvent event) {
+        if (isShopInventory(event.getSource())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (isShopInventory(event.getDestination())) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean isShopInventory(Inventory inventory) {
+        InventoryHolder holder = inventory.getHolder();
+
+        // If the inventory belongs to a block (Chest, Barrel, etc.)
+        if (holder instanceof Container container) {
+            return manager.isShopBlock(container.getBlock());
+        }
+
+        if (holder instanceof DoubleChest doubleChest) {
+            if (doubleChest.getLeftSide() instanceof Container left) {
+                return manager.isShopBlock(left.getBlock());
+            }
+        }
+
+        return false;
     }
 }
