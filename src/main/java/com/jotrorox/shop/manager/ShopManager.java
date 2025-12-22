@@ -185,8 +185,8 @@ public class ShopManager {
         if (isShopSign(block.getLocation())) return true;
 
         for (Shop shop : shops.values()) {
-            if (shop.getChestLocation() != null &&
-                    isSameChest(shop.getChestLocation().getBlock(), block)) {
+            Block shopChestBlock = shop.getChestLocation().getBlock();
+            if (isSameChest(shopChestBlock, block)) {
                 return true;
             }
         }

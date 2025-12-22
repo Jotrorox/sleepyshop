@@ -354,14 +354,16 @@ public class ShopListener implements Listener {
     private boolean isShopInventory(Inventory inventory) {
         InventoryHolder holder = inventory.getHolder();
 
-        // If the inventory belongs to a block (Chest, Barrel, etc.)
-        if (holder instanceof Container container) {
+        if (holder instanceof org.bukkit.block.Container container) {
             return manager.isShopBlock(container.getBlock());
         }
 
-        if (holder instanceof DoubleChest doubleChest) {
-            if (doubleChest.getLeftSide() instanceof Container left) {
-                return manager.isShopBlock(left.getBlock());
+        if (holder instanceof org.bukkit.block.DoubleChest doubleChest) {
+            if (doubleChest.getLeftSide() instanceof org.bukkit.block.Container left) {
+                if (manager.isShopBlock(left.getBlock())) return true;
+            }
+            if (doubleChest.getRightSide() instanceof org.bukkit.block.Container right) {
+                return manager.isShopBlock(right.getBlock());
             }
         }
 
