@@ -30,43 +30,7 @@ public class ShopManager {
 
     public ShopManager(JavaPlugin plugin) {
         this.plugin = plugin;
-        migrateIfNecessary();
         loadShops();
-    }
-
-    private void migrateIfNecessary() {
-        File yamlFile = new File(plugin.getDataFolder(), "shops.yml");
-        if (yamlFile.exists()) {
-            plugin.getLogger().info("Found shops.yml, migrating to SQLite...");
-            FileConfiguration config = YamlConfiguration.loadConfiguration(yamlFile);
-            for (String key : config.getKeys(false)) {
-                ConfigurationSection section = config.getConfigurationSection(key);
-                if (section == null) continue;
-
-                Location signLoc = section.getLocation("sign");
-                Location chestLoc = section.getLocation("chest");
-                String ownerStr = section.getString("owner");
-                if (signLoc == null || chestLoc == null || ownerStr == null) continue;
-
-                Shop shop = new Shop(signLoc, chestLoc, UUID.fromString(ownerStr));
-                shop.setSellItem(section.getItemStack("item"));
-                shop.setPaymentItem(section.getItemStack("paymentItem", new ItemStack(Material.DIAMOND)));
-                shop.setTakeAmount(section.getInt("price"));
-                shop.setOutputAmount(section.getInt("amount", 1));
-                shop.setShopName(section.getString("shopName"));
-                shop.setShowDisplay(section.getBoolean("showDisplay", true));
-                shop.setShowStockMessage(section.getBoolean("showStockMessage", true));
-
-                String displayIdStr = section.getString("displayId");
-                if (displayIdStr != null) {
-                    shop.setDisplayEntityId(UUID.fromString(displayIdStr));
-                }
-
-                ((SleepyShop) plugin).getDatabaseManager().saveShop(shop).join();
-            }
-            var ignored = yamlFile.renameTo(new File(plugin.getDataFolder(), "shops.yml.bak"));
-            plugin.getLogger().info("Migration complete! shops.yml renamed to shops.yml.bak");
-        }
     }
 
     private void loadShops() {
