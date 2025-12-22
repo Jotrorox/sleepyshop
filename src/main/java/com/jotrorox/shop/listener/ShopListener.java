@@ -18,6 +18,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -27,6 +29,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -315,5 +318,24 @@ public class ShopListener implements Listener {
         shop.setShopName(name);
         manager.saveShop(shop);
         player.sendMessage(PREFIX.append(Component.text("Shop name set to: " + name, NamedTextColor.GREEN)));
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        handleExplosion(event.blockList().iterator());
+    }
+
+    @EventHandler
+    public void onBlockExplode(BlockExplodeEvent event) {
+        handleExplosion(event.blockList().iterator());
+    }
+
+    private void handleExplosion(Iterator<Block> iterator) {
+        while (iterator.hasNext()) {
+            Block block = iterator.next();
+            if (manager.isShopBlock(block)) {
+                iterator.remove();
+            }
+        }
     }
 }

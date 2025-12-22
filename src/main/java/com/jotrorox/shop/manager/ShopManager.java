@@ -181,4 +181,24 @@ public class ShopManager {
         return loc.getWorld().getName() + "_" + loc.getBlockX() + "_" + loc.getBlockY() + "_" + loc.getBlockZ();
     }
 
+    public boolean isShopBlock(Block block) {
+        if (isShopSign(block.getLocation())) return true;
+
+        for (Shop shop : shops.values()) {
+            if (shop.getChestLocation() != null &&
+                    isSameChest(shop.getChestLocation().getBlock(), block)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSameChest(Block shopChest, Block target) {
+        if (shopChest.equals(target)) return true;
+        if (shopChest.getState() instanceof Chest c1 && target.getState() instanceof Chest c2) {
+            return c1.getInventory().equals(c2.getInventory());
+        }
+        return false;
+    }
+
 }
