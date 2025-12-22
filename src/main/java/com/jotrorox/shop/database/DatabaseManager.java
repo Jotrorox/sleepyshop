@@ -31,7 +31,7 @@ public class DatabaseManager {
         try {
             File dataFolder = plugin.getDataFolder();
             if (!dataFolder.exists()) {
-                dataFolder.mkdirs();
+                var ignored = dataFolder.mkdirs();
             }
             File dbFile = new File(dataFolder, "shops.db");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
@@ -56,7 +56,6 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             plugin.getLogger().severe("Could not initialize SQLite database!");
-            e.printStackTrace();
         }
     }
 
@@ -67,7 +66,7 @@ public class DatabaseManager {
             }
             executor.shutdown();
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().severe("Could not initialize close SQLite database!");
         }
     }
 
@@ -129,21 +128,22 @@ public class DatabaseManager {
                 pstmt.executeUpdate();
             } catch (SQLException e) {
                 plugin.getLogger().severe("Could not save shop to SQLite!");
-                e.printStackTrace();
             }
         }, executor);
     }
 
-    public CompletableFuture<Void> removeShop(Location signLoc) {
-        if (connection == null) return CompletableFuture.completedFuture(null);
-        return CompletableFuture.runAsync(() -> {
+    public void removeShop(Location signLoc) {
+        if (connection == null) {
+            CompletableFuture.completedFuture(null);
+            return;
+        }
+        CompletableFuture.runAsync(() -> {
             String sql = "DELETE FROM shops WHERE sign_location = ?";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 pstmt.setString(1, serializeLocation(signLoc));
                 pstmt.executeUpdate();
             } catch (SQLException e) {
                 plugin.getLogger().severe("Could not remove shop from SQLite!");
-                e.printStackTrace();
             }
         }, executor);
     }
@@ -178,7 +178,6 @@ public class DatabaseManager {
                 }
             } catch (SQLException e) {
                 plugin.getLogger().severe("Could not load shops from SQLite!");
-                e.printStackTrace();
             }
             return shops;
         }, executor);

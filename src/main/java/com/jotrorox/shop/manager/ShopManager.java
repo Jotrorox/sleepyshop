@@ -64,28 +64,24 @@ public class ShopManager {
 
                 ((SleepyShop) plugin).getDatabaseManager().saveShop(shop).join();
             }
-            yamlFile.renameTo(new File(plugin.getDataFolder(), "shops.yml.bak"));
+            var ignored = yamlFile.renameTo(new File(plugin.getDataFolder(), "shops.yml.bak"));
             plugin.getLogger().info("Migration complete! shops.yml renamed to shops.yml.bak");
         }
     }
 
     private void loadShops() {
-        ((SleepyShop) plugin).getDatabaseManager().loadShops().thenAccept(loadedShops -> {
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                for (Shop shop : loadedShops) {
-                    shops.put(locationToString(shop.getSignLocation()), shop);
-                    updateDisplay(shop);
-                }
-            });
-        });
+        ((SleepyShop) plugin).getDatabaseManager().loadShops().thenAccept(loadedShops -> Bukkit.getScheduler().runTask(plugin, () -> {
+            for (Shop shop : loadedShops) {
+                shops.put(locationToString(shop.getSignLocation()), shop);
+                updateDisplay(shop);
+            }
+        }));
     }
 
     public void saveShop(Shop shop) {
         String id = locationToString(shop.getSignLocation());
         shops.put(id, shop);
-        ((SleepyShop) plugin).getDatabaseManager().saveShop(shop).thenRun(() -> {
-            Bukkit.getScheduler().runTask(plugin, () -> updateDisplay(shop));
-        });
+        ((SleepyShop) plugin).getDatabaseManager().saveShop(shop).thenRun(() -> Bukkit.getScheduler().runTask(plugin, () -> updateDisplay(shop)));
     }
 
     public void removeShop(Location signLoc) {
@@ -129,7 +125,7 @@ public class ShopManager {
         }
 
         if (display == null) {
-            // Search for existing display at the location to avoid duplicates
+            // Search for an existing display at the location to avoid duplicates
             for (Entity nearby : loc.getWorld().getNearbyEntities(loc, 0.1, 0.1, 0.1)) {
                 if (nearby instanceof TextDisplay td) {
                     display = td;

@@ -3,27 +3,12 @@ package com.jotrorox.shop.gui;
 import com.jotrorox.shop.model.Shop;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-public class ShopInventoryHolder implements InventoryHolder {
-    private final Shop shop;
-    private final String title;
-
-    public ShopInventoryHolder(Shop shop, String title) {
-        this.shop = shop;
-        this.title = title;
-    }
+public record ShopInventoryHolder(Shop shop, String title) implements InventoryHolder {
 
     @Override
-    public @NotNull Inventory getInventory() {
+    public @NonNull Inventory getInventory() {
         return null;
-    }
-
-    public Shop getShop() {
-        return shop;
-    }
-
-    public String getTitle() {
-        return title;
     }
 }

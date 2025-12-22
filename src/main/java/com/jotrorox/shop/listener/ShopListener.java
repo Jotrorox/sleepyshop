@@ -138,11 +138,9 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getInventory().getHolder() instanceof ShopInventoryHolder holder)) return;
+        if (!(event.getInventory().getHolder() instanceof ShopInventoryHolder(Shop shop, String title))) return;
 
         Player player = (Player) event.getWhoClicked();
-        Shop shop = holder.getShop();
-        String title = holder.getTitle();
 
         if (event.getClickedInventory() == event.getView().getTopInventory()) {
             event.setCancelled(true);
@@ -166,66 +164,71 @@ public class ShopListener implements Listener {
 
     private void handleOwnerClick(InventoryClickEvent event, Player player, Shop shop, String title) {
         int slot = event.getRawSlot();
-        
-        if (title.equals(ShopGuiProvider.OWNER_GUI_TITLE)) {
-            if (slot == 11) guiProvider.openPriceGui(player, shop);
-            else if (slot == 13) guiProvider.openItemsGui(player, shop);
-            else if (slot == 15) guiProvider.openOtherGui(player, shop);
-            else if (slot == 26) { // Disband
-                manager.removeShop(shop.getSignLocation());
-                shop.getSignLocation().getBlock().setType(Material.AIR);
-                player.closeInventory();
-                player.sendMessage(PREFIX.append(Component.text("SleepyShop disbanded.", NamedTextColor.YELLOW)));
-            }
-        } else if (title.equals(ShopGuiProvider.PRICE_GUI_TITLE)) {
-            if (slot == 31) guiProvider.openOwnerGui(player, shop);
-            // Price (Take Amount)
-            else if (slot == 10) adjustTakeAmount(shop, -10, player);
-            else if (slot == 11) adjustTakeAmount(shop, -1, player);
-            else if (slot == 15) adjustTakeAmount(shop, 1, player);
-            else if (slot == 16) adjustTakeAmount(shop, 10, player);
-            // Amount (Output Amount)
-            else if (slot == 19) adjustOutputAmount(shop, -10, player);
-            else if (slot == 20) adjustOutputAmount(shop, -1, player);
-            else if (slot == 24) adjustOutputAmount(shop, 1, player);
-            else if (slot == 25) adjustOutputAmount(shop, 10, player);
-        } else if (title.equals(ShopGuiProvider.ITEMS_GUI_TITLE)) {
-            if (slot == 18) guiProvider.openOwnerGui(player, shop);
-            else if (slot == 11) { // Sell Item
-                ItemStack cursor = event.getCursor();
-                if (cursor != null && cursor.getType() != Material.AIR) {
-                    ItemStack shopItem = cursor.clone();
-                    shopItem.setAmount(1);
-                    shop.setSellItem(shopItem);
-                    manager.saveShop(shop);
-                    player.sendMessage(PREFIX.append(Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN)));
-                    guiProvider.openItemsGui(player, shop);
-                }
-            } else if (slot == 15) { // Payment Item
-                ItemStack cursor = event.getCursor();
-                if (cursor != null && cursor.getType() != Material.AIR) {
-                    ItemStack payItem = cursor.clone();
-                    payItem.setAmount(1);
-                    shop.setPaymentItem(payItem);
-                    manager.saveShop(shop);
-                    player.sendMessage(PREFIX.append(Component.text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN)));
-                    guiProvider.openItemsGui(player, shop);
+
+        switch (title) {
+            case ShopGuiProvider.OWNER_GUI_TITLE -> {
+                if (slot == 11) guiProvider.openPriceGui(player, shop);
+                else if (slot == 13) guiProvider.openItemsGui(player, shop);
+                else if (slot == 15) guiProvider.openOtherGui(player, shop);
+                else if (slot == 26) { // Disband
+                    manager.removeShop(shop.getSignLocation());
+                    shop.getSignLocation().getBlock().setType(Material.AIR);
+                    player.closeInventory();
+                    player.sendMessage(PREFIX.append(Component.text("SleepyShop disbanded.", NamedTextColor.YELLOW)));
                 }
             }
-        } else if (title.equals(ShopGuiProvider.OTHER_GUI_TITLE)) {
-            if (slot == 18) guiProvider.openOwnerGui(player, shop);
-            else if (slot == 13) {
-                namingSession.put(player.getUniqueId(), shop);
-                player.closeInventory();
-                player.sendMessage(PREFIX.append(Component.text("Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):", NamedTextColor.YELLOW)));
-            } else if (slot == 11) { // Toggle Hologram
-                shop.setShowDisplay(!shop.isShowDisplay());
-                manager.saveShop(shop);
-                guiProvider.openOtherGui(player, shop);
-            } else if (slot == 15) { // Toggle Stock Warning
-                shop.setShowStockMessage(!shop.isShowStockMessage());
-                manager.saveShop(shop);
-                guiProvider.openOtherGui(player, shop);
+            case ShopGuiProvider.PRICE_GUI_TITLE -> {
+                if (slot == 31) guiProvider.openOwnerGui(player, shop);
+                    // Price (Take Amount)
+                else if (slot == 10) adjustTakeAmount(shop, -10, player);
+                else if (slot == 11) adjustTakeAmount(shop, -1, player);
+                else if (slot == 15) adjustTakeAmount(shop, 1, player);
+                else if (slot == 16) adjustTakeAmount(shop, 10, player);
+                    // Amount (Output Amount)
+                else if (slot == 19) adjustOutputAmount(shop, -10, player);
+                else if (slot == 20) adjustOutputAmount(shop, -1, player);
+                else if (slot == 24) adjustOutputAmount(shop, 1, player);
+                else if (slot == 25) adjustOutputAmount(shop, 10, player);
+            }
+            case ShopGuiProvider.ITEMS_GUI_TITLE -> {
+                if (slot == 18) guiProvider.openOwnerGui(player, shop);
+                else if (slot == 11) { // Sell Item
+                    ItemStack cursor = event.getCursor();
+                    if (cursor.getType() != Material.AIR) {
+                        ItemStack shopItem = cursor.clone();
+                        shopItem.setAmount(1);
+                        shop.setSellItem(shopItem);
+                        manager.saveShop(shop);
+                        player.sendMessage(PREFIX.append(Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN)));
+                        guiProvider.openItemsGui(player, shop);
+                    }
+                } else if (slot == 15) { // Payment Item
+                    ItemStack cursor = event.getCursor();
+                    if (cursor.getType() != Material.AIR) {
+                        ItemStack payItem = cursor.clone();
+                        payItem.setAmount(1);
+                        shop.setPaymentItem(payItem);
+                        manager.saveShop(shop);
+                        player.sendMessage(PREFIX.append(Component.text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN)));
+                        guiProvider.openItemsGui(player, shop);
+                    }
+                }
+            }
+            case ShopGuiProvider.OTHER_GUI_TITLE -> {
+                if (slot == 18) guiProvider.openOwnerGui(player, shop);
+                else if (slot == 13) {
+                    namingSession.put(player.getUniqueId(), shop);
+                    player.closeInventory();
+                    player.sendMessage(PREFIX.append(Component.text("Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):", NamedTextColor.YELLOW)));
+                } else if (slot == 11) { // Toggle Hologram
+                    shop.setShowDisplay(!shop.isShowDisplay());
+                    manager.saveShop(shop);
+                    guiProvider.openOtherGui(player, shop);
+                } else if (slot == 15) { // Toggle Stock Warning
+                    shop.setShowStockMessage(!shop.isShowStockMessage());
+                    manager.saveShop(shop);
+                    guiProvider.openOtherGui(player, shop);
+                }
             }
         }
     }
