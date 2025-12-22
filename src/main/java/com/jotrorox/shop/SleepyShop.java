@@ -4,6 +4,7 @@ import com.jotrorox.shop.database.DatabaseManager;
 import com.jotrorox.shop.listener.ShopListener;
 import com.jotrorox.shop.listener.SignListener;
 import com.jotrorox.shop.manager.ShopManager;
+import com.jotrorox.shop.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,6 +21,8 @@ public final class SleepyShop extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new SignListener(shopManager), this);
 
         getLogger().info("SleepyShop has been enabled! Made by Jotrorox and RelaxoGames.");
+
+        (new UpdateChecker(this, "Jotrorox/SleepyShop")).performCheck();
     }
 
     @Override
