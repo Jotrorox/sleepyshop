@@ -1,5 +1,5 @@
 name: SleepyShop
-version: '0.2'
+version: '0.3'
 main: com.jotrorox.shop.SleepyShop
 api-version: '1.21'
 authors: [ Johannes (jotrorox) Müller <mail@jotrorox.com> ]
