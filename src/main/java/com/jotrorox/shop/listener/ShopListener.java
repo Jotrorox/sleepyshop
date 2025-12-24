@@ -98,15 +98,26 @@ public class ShopListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         Block block = event.getClickedBlock();
         if (block == null || !isChest(block)) return;
+        
+        if (manager.isShopBlock(block)) {
+            Shop associatedShop = null;
+            for (Shop shop : manager.getShops().values()) {
+                if (isSameChest(shop.getChestLocation().getBlock(), block)) {
+                    associatedShop = shop;
+                    break;
+                }
+            }
 
-        for (Shop shop : manager.getShops().values()) {
-            if (isSameChest(shop.getChestLocation().getBlock(), block)) {
-                if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
+            if (associatedShop != null) {
+                if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
                     event.setCancelled(true);
                     event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
-                }
-                return;
+                } 
+            } else {
+                event.setCancelled(true);
+                event.getPlayer().sendMessage(PREFIX.append(Component.text("This block is protected by a shop!", NamedTextColor.RED)));
             }
+
         }
     }
 
