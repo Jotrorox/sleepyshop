@@ -48,7 +48,8 @@ public class ShopListener implements Listener {
     public void onChunkLoad(ChunkLoadEvent event) {
         manager.getShops().values().stream()
                 .filter(shop -> shop.getChestLocation().getWorld().equals(event.getWorld()))
-                .filter(shop -> shop.getChestLocation().getBlockX() >> 4 == event.getChunk().getX() && shop.getChestLocation().getBlockZ() >> 4 == event.getChunk().getZ())
+                .filter(shop -> shop.getChestLocation().getBlockX() >> 4 == event.getChunk().getX()
+                        && shop.getChestLocation().getBlockZ() >> 4 == event.getChunk().getZ())
                 .forEach(manager::updateDisplay);
     }
 
@@ -61,10 +62,12 @@ public class ShopListener implements Listener {
             Shop shop = manager.getShop(loc);
             if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(PREFIX.append(Component.text("You cannot break this shop!", NamedTextColor.RED)));
+                event.getPlayer()
+                        .sendMessage(PREFIX.append(Component.text("You cannot break this shop!", NamedTextColor.RED)));
             } else {
                 manager.removeShop(loc);
-                event.getPlayer().sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
+                event.getPlayer()
+                        .sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
             }
             return;
         }
@@ -81,24 +84,29 @@ public class ShopListener implements Listener {
             if (associatedShop != null) {
                 if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
                     event.setCancelled(true);
-                    event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
+                    event.getPlayer().sendMessage(
+                            PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
                 } else {
                     manager.removeShop(associatedShop.getSignLocation());
-                    event.getPlayer().sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
+                    event.getPlayer()
+                            .sendMessage(PREFIX.append(Component.text("SleepyShop removed.", NamedTextColor.YELLOW)));
                 }
             } else {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(PREFIX.append(Component.text("This block is protected by a shop!", NamedTextColor.RED)));
+                event.getPlayer().sendMessage(
+                        PREFIX.append(Component.text("This block is protected by a shop!", NamedTextColor.RED)));
             }
         }
     }
 
     @EventHandler
     public void onChestAccess(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
         Block block = event.getClickedBlock();
-        if (block == null || !isChest(block)) return;
-        
+        if (block == null || !isChest(block))
+            return;
+
         if (manager.isShopBlock(block)) {
             Shop associatedShop = null;
             for (Shop shop : manager.getShops().values()) {
@@ -111,11 +119,17 @@ public class ShopListener implements Listener {
             if (associatedShop != null) {
                 if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
                     event.setCancelled(true);
-                    event.getPlayer().sendMessage(PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
-                } 
+                    event.getPlayer().sendMessage(
+                            PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
+                }
             } else {
+                if (event.getPlayer().isOp()) {
+                    event.setCancelled(false);
+                    return;
+                }
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(PREFIX.append(Component.text("This block is protected by a shop!", NamedTextColor.RED)));
+                event.getPlayer().sendMessage(
+                        PREFIX.append(Component.text("This block is protected by a shop!", NamedTextColor.RED)));
             }
 
         }
@@ -138,11 +152,13 @@ public class ShopListener implements Listener {
     }
 
     private boolean isChest(Block block) {
-        return block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST || block.getType() == Material.BARREL;
+        return block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST
+                || block.getType() == Material.BARREL;
     }
 
     private boolean isSameChest(Block shopChest, Block target) {
-        if (shopChest.equals(target)) return true;
+        if (shopChest.equals(target))
+            return true;
         if (shopChest.getState() instanceof Chest c1 && target.getState() instanceof Chest c2) {
             return c1.getInventory().equals(c2.getInventory());
         }
@@ -151,9 +167,11 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onSignClick(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
         Block block = event.getClickedBlock();
-        if (block == null || !(block.getState() instanceof Sign)) return;
+        if (block == null || !(block.getState() instanceof Sign))
+            return;
 
         Shop shop = manager.getShop(block.getLocation());
         if (shop != null) {
@@ -168,14 +186,17 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getInventory().getHolder() instanceof ShopInventoryHolder(Shop shop, String title))) return;
+        if (!(event.getInventory().getHolder() instanceof ShopInventoryHolder holder))
+            return;
 
+        Shop shop = holder.shop();
+        String title = holder.title();
         Player player = (Player) event.getWhoClicked();
 
         if (event.getClickedInventory() == event.getView().getTopInventory()) {
             event.setCancelled(true);
             if (title.equals(ShopGuiProvider.BUYER_GUI_TITLE)) {
-                handleBuyerClick(event, player, shop);
+                handleBuyerClick(event, player, shop, holder);
             } else {
                 handleOwnerClick(event, player, shop, title);
             }
@@ -197,9 +218,12 @@ public class ShopListener implements Listener {
 
         switch (title) {
             case ShopGuiProvider.OWNER_GUI_TITLE -> {
-                if (slot == 11) guiProvider.openPriceGui(player, shop);
-                else if (slot == 13) guiProvider.openItemsGui(player, shop);
-                else if (slot == 15) guiProvider.openOtherGui(player, shop);
+                if (slot == 11)
+                    guiProvider.openPriceGui(player, shop);
+                else if (slot == 13)
+                    guiProvider.openItemsGui(player, shop);
+                else if (slot == 15)
+                    guiProvider.openOtherGui(player, shop);
                 else if (slot == 26) { // Disband
                     manager.removeShop(shop.getSignLocation());
                     shop.getSignLocation().getBlock().setType(Material.AIR);
@@ -208,20 +232,30 @@ public class ShopListener implements Listener {
                 }
             }
             case ShopGuiProvider.PRICE_GUI_TITLE -> {
-                if (slot == 31) guiProvider.openOwnerGui(player, shop);
-                    // Price (Take Amount)
-                else if (slot == 10) adjustTakeAmount(shop, -10, player);
-                else if (slot == 11) adjustTakeAmount(shop, -1, player);
-                else if (slot == 15) adjustTakeAmount(shop, 1, player);
-                else if (slot == 16) adjustTakeAmount(shop, 10, player);
-                    // Amount (Output Amount)
-                else if (slot == 19) adjustOutputAmount(shop, -10, player);
-                else if (slot == 20) adjustOutputAmount(shop, -1, player);
-                else if (slot == 24) adjustOutputAmount(shop, 1, player);
-                else if (slot == 25) adjustOutputAmount(shop, 10, player);
+                if (slot == 31)
+                    guiProvider.openOwnerGui(player, shop);
+                // Price (Take Amount)
+                else if (slot == 10)
+                    adjustTakeAmount(shop, -10, player);
+                else if (slot == 11)
+                    adjustTakeAmount(shop, -1, player);
+                else if (slot == 15)
+                    adjustTakeAmount(shop, 1, player);
+                else if (slot == 16)
+                    adjustTakeAmount(shop, 10, player);
+                // Amount (Output Amount)
+                else if (slot == 19)
+                    adjustOutputAmount(shop, -10, player);
+                else if (slot == 20)
+                    adjustOutputAmount(shop, -1, player);
+                else if (slot == 24)
+                    adjustOutputAmount(shop, 1, player);
+                else if (slot == 25)
+                    adjustOutputAmount(shop, 10, player);
             }
             case ShopGuiProvider.ITEMS_GUI_TITLE -> {
-                if (slot == 18) guiProvider.openOwnerGui(player, shop);
+                if (slot == 18)
+                    guiProvider.openOwnerGui(player, shop);
                 else if (slot == 11) { // Sell Item
                     ItemStack cursor = event.getCursor();
                     if (cursor.getType() != Material.AIR) {
@@ -229,7 +263,8 @@ public class ShopListener implements Listener {
                         shopItem.setAmount(1);
                         shop.setSellItem(shopItem);
                         manager.saveShop(shop);
-                        player.sendMessage(PREFIX.append(Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN)));
+                        player.sendMessage(PREFIX.append(
+                                Component.text("Sell item set to " + shopItem.getType().name(), NamedTextColor.GREEN)));
                         guiProvider.openItemsGui(player, shop);
                     }
                 } else if (slot == 15) { // Payment Item
@@ -239,17 +274,21 @@ public class ShopListener implements Listener {
                         payItem.setAmount(1);
                         shop.setPaymentItem(payItem);
                         manager.saveShop(shop);
-                        player.sendMessage(PREFIX.append(Component.text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN)));
+                        player.sendMessage(PREFIX.append(Component
+                                .text("Payment item set to " + payItem.getType().name(), NamedTextColor.GREEN)));
                         guiProvider.openItemsGui(player, shop);
                     }
                 }
             }
             case ShopGuiProvider.OTHER_GUI_TITLE -> {
-                if (slot == 18) guiProvider.openOwnerGui(player, shop);
+                if (slot == 18)
+                    guiProvider.openOwnerGui(player, shop);
                 else if (slot == 13) {
                     namingSession.put(player.getUniqueId(), shop);
                     player.closeInventory();
-                    player.sendMessage(PREFIX.append(Component.text("Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):", NamedTextColor.YELLOW)));
+                    player.sendMessage(PREFIX.append(Component.text(
+                            "Please enter the shop name in chat (type 'cancel' to stop or 'reset' for default):",
+                            NamedTextColor.YELLOW)));
                 } else if (slot == 11) { // Toggle Hologram
                     shop.setShowDisplay(!shop.isShowDisplay());
                     manager.saveShop(shop);
@@ -275,14 +314,50 @@ public class ShopListener implements Listener {
         guiProvider.openPriceGui(player, shop);
     }
 
-    private void handleBuyerClick(InventoryClickEvent event, Player player, Shop shop) {
-        if (event.getRawSlot() == 8) { // Confirm Purchase
-            performTransaction(player, shop);
+    private void handleBuyerClick(InventoryClickEvent event, Player player, Shop shop, ShopInventoryHolder holder) {
+        int slot = event.getRawSlot();
+
+        switch (slot) {
+            case 2 -> adjustTransactionCount(event.getInventory(), shop, holder, -10, player);
+            case 3 -> adjustTransactionCount(event.getInventory(), shop, holder, -1, player);
+            case 5 -> adjustTransactionCount(event.getInventory(), shop, holder, 1, player);
+            case 6 -> adjustTransactionCount(event.getInventory(), shop, holder, 10, player);
+            case 18 -> player.closeInventory(); // Cancel button
+            case 22 -> performTransaction(player, shop, holder.getTransactionCount());
         }
     }
 
-    private void performTransaction(Player buyer, Shop shop) {
-        if (shop.getSellItem() == null) return;
+    private void adjustTransactionCount(Inventory inv, Shop shop, ShopInventoryHolder holder, int delta,
+            Player player) {
+        int maxTransactions = calculateMaxTransactions(shop);
+        int newCount = Math.max(1, Math.min(maxTransactions, holder.getTransactionCount() + delta));
+        holder.setTransactionCount(newCount);
+        guiProvider.updateBuyerGui(inv, shop, newCount, maxTransactions);
+    }
+
+    private int calculateMaxTransactions(Shop shop) {
+        if (shop.getSellItem() == null)
+            return 0;
+
+        Block chestBlock = shop.getChestLocation().getBlock();
+        if (!(chestBlock.getState() instanceof Chest chest)) {
+            return 0;
+        }
+
+        Inventory chestInv = chest.getInventory();
+        int totalItems = 0;
+        for (ItemStack item : chestInv.getContents()) {
+            if (item != null && item.isSimilar(shop.getSellItem())) {
+                totalItems += item.getAmount();
+            }
+        }
+
+        return totalItems / shop.getOutputAmount();
+    }
+
+    private void performTransaction(Player buyer, Shop shop, int transactionCount) {
+        if (shop.getSellItem() == null)
+            return;
 
         Block chestBlock = shop.getChestLocation().getBlock();
         if (!(chestBlock.getState() instanceof Chest chest)) {
@@ -291,32 +366,44 @@ public class ShopListener implements Listener {
         }
 
         Inventory chestInv = chest.getInventory();
-        if (!chestInv.containsAtLeast(shop.getSellItem(), shop.getOutputAmount())) {
-            buyer.sendMessage(PREFIX.append(Component.text("Shop is out of stock!", NamedTextColor.RED)));
+
+        // Calculate total amounts needed
+        int totalOutputItems = shop.getOutputAmount() * transactionCount;
+        int totalPaymentAmount = shop.getTakeAmount() * transactionCount;
+
+        // Check if chest has enough stock
+        if (!chestInv.containsAtLeast(shop.getSellItem(), totalOutputItems)) {
+            buyer.sendMessage(PREFIX.append(Component.text("Shop doesn't have enough stock!", NamedTextColor.RED)));
             return;
         }
 
         // Check buyer's payment
         ItemStack payment = shop.getPaymentItem().clone();
-        payment.setAmount(shop.getTakeAmount());
-        if (shop.getTakeAmount() > 0 && !buyer.getInventory().containsAtLeast(payment, shop.getTakeAmount())) {
-            buyer.sendMessage(PREFIX.append(Component.text("You don't have enough " + payment.getType().name() + "!", NamedTextColor.RED)));
+        payment.setAmount(totalPaymentAmount);
+        if (totalPaymentAmount > 0
+                && !buyer.getInventory().containsAtLeast(shop.getPaymentItem(), totalPaymentAmount)) {
+            buyer.sendMessage(PREFIX.append(
+                    Component.text("You don't have enough " + payment.getType().name() + "!", NamedTextColor.RED)));
             return;
         }
 
-        // Transaction
-        if (shop.getTakeAmount() > 0) {
+        // Transaction - take payment from buyer and add to chest
+        if (totalPaymentAmount > 0) {
             buyer.getInventory().removeItem(payment);
             chestInv.addItem(payment);
         }
 
-        // Remove item from chest and give to buyer
+        // Remove items from chest and give to buyer
         ItemStack toGive = shop.getSellItem().clone();
-        toGive.setAmount(shop.getOutputAmount());
+        toGive.setAmount(totalOutputItems);
         chestInv.removeItem(toGive);
-        buyer.getInventory().addItem(toGive).values().forEach(item -> buyer.getWorld().dropItem(buyer.getLocation(), item));
+        buyer.getInventory().addItem(toGive).values()
+                .forEach(item -> buyer.getWorld().dropItem(buyer.getLocation(), item));
 
-        buyer.sendMessage(PREFIX.append(Component.text("Purchase successful!", NamedTextColor.GREEN)));
+        String message = transactionCount > 1
+                ? "Purchase successful! (" + transactionCount + " transactions)"
+                : "Purchase successful!";
+        buyer.sendMessage(PREFIX.append(Component.text(message, NamedTextColor.GREEN)));
         buyer.closeInventory();
         manager.updateDisplay(shop);
     }
@@ -325,7 +412,8 @@ public class ShopListener implements Listener {
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
         Shop shop = namingSession.remove(player.getUniqueId());
-        if (shop == null) return;
+        if (shop == null)
+            return;
 
         event.setCancelled(true);
         String name = PlainTextComponentSerializer.plainText().serialize(event.message());
@@ -387,7 +475,8 @@ public class ShopListener implements Listener {
 
         if (holder instanceof org.bukkit.block.DoubleChest doubleChest) {
             if (doubleChest.getLeftSide() instanceof org.bukkit.block.Container left) {
-                if (manager.isShopBlock(left.getBlock())) return true;
+                if (manager.isShopBlock(left.getBlock()))
+                    return true;
             }
             if (doubleChest.getRightSide() instanceof org.bukkit.block.Container right) {
                 return manager.isShopBlock(right.getBlock());

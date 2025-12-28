@@ -5,7 +5,31 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jspecify.annotations.NonNull;
 
-public record ShopInventoryHolder(Shop shop, String title) implements InventoryHolder {
+public class ShopInventoryHolder implements InventoryHolder {
+    private final Shop shop;
+    private final String title;
+    private int transactionCount = 1;
+
+    public ShopInventoryHolder(Shop shop, String title) {
+        this.shop = shop;
+        this.title = title;
+    }
+
+    public Shop shop() {
+        return shop;
+    }
+
+    public String title() {
+        return title;
+    }
+
+    public int getTransactionCount() {
+        return transactionCount;
+    }
+
+    public void setTransactionCount(int transactionCount) {
+        this.transactionCount = transactionCount;
+    }
 
     @Override
     public @NonNull Inventory getInventory() {
