@@ -318,17 +318,16 @@ public class ShopListener implements Listener {
         int slot = event.getRawSlot();
 
         switch (slot) {
-            case 2 -> adjustTransactionCount(event.getInventory(), shop, holder, -10, player);
-            case 3 -> adjustTransactionCount(event.getInventory(), shop, holder, -1, player);
-            case 5 -> adjustTransactionCount(event.getInventory(), shop, holder, 1, player);
-            case 6 -> adjustTransactionCount(event.getInventory(), shop, holder, 10, player);
+            case 2 -> adjustTransactionCount(event.getInventory(), shop, holder, -10);
+            case 3 -> adjustTransactionCount(event.getInventory(), shop, holder, -1);
+            case 5 -> adjustTransactionCount(event.getInventory(), shop, holder, 1);
+            case 6 -> adjustTransactionCount(event.getInventory(), shop, holder, 10);
             case 18 -> player.closeInventory(); // Cancel button
             case 22 -> performTransaction(player, shop, holder.getTransactionCount());
         }
     }
 
-    private void adjustTransactionCount(Inventory inv, Shop shop, ShopInventoryHolder holder, int delta,
-            Player player) {
+    private void adjustTransactionCount(Inventory inv, Shop shop, ShopInventoryHolder holder, int delta) {
         int maxTransactions = calculateMaxTransactions(shop);
         int newCount = Math.max(1, Math.min(maxTransactions, holder.getTransactionCount() + delta));
         holder.setTransactionCount(newCount);

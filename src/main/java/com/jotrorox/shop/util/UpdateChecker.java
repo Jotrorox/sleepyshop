@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 public class UpdateChecker {
@@ -35,7 +35,7 @@ public class UpdateChecker {
 
                 JsonObject json = JsonParser.parseString(response).getAsJsonObject();
 
-                if (json.has("result") && json.getAsJsonArray("result").size() > 0) {
+                if (json.has("result") && !json.getAsJsonArray("result").isEmpty()) {
                     JsonObject latestVersionObj = json.getAsJsonArray("result").get(0).getAsJsonObject();
                     String latestVersion = latestVersionObj.get("name").getAsString();
                     String downloadUrl = "https://hangar.papermc.io/" + hangarSlug + "/versions/" + latestVersion;
@@ -72,8 +72,8 @@ public class UpdateChecker {
 
     private String makeRequest(String urlString) {
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            var url = new URI(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.toURL().openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");
             connection.setConnectTimeout(5000);

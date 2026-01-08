@@ -1,8 +1,10 @@
 package com.jotrorox.shop.gui;
 
 import com.jotrorox.shop.model.Shop;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 public class ShopInventoryHolder implements InventoryHolder {
@@ -32,7 +34,5 @@ public class ShopInventoryHolder implements InventoryHolder {
     }
 
     @Override
-    public @NonNull Inventory getInventory() {
-        return null;
-    }
+    public @NotNull Inventory getInventory() { return null; }
 }

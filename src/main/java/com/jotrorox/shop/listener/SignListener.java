@@ -13,17 +13,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
-public class SignListener implements Listener {
-    private final ShopManager manager;
-    private static final Component PREFIX = Component.text("[SleepyShop] ", NamedTextColor.BLUE);
+import java.util.Objects;
 
-    public SignListener(ShopManager manager) {
-        this.manager = manager;
-    }
+public record SignListener(ShopManager manager) implements Listener {
+    private static final Component PREFIX = Component.text("[SleepyShop] ", NamedTextColor.BLUE);
 
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
-        String line1 = PlainTextComponentSerializer.plainText().serialize(event.line(0));
+        String line1 = PlainTextComponentSerializer.plainText().serialize(Objects.requireNonNull(event.line(0)));
         if (line1.equalsIgnoreCase("[Shop]") || line1.equalsIgnoreCase("[SleepyShop]")) {
             Block signBlock = event.getBlock();
             Block chestBlock = findAttachedChest(signBlock);

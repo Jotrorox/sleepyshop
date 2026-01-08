@@ -20,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ShopManager {
     private final JavaPlugin plugin;
@@ -206,8 +207,8 @@ public class ShopManager {
             InventoryHolder holder = chest.getInventory().getHolder();
             if (holder instanceof DoubleChest doubleChest) {
                 // Check both sides of the double chest against the saved shop location
-                Location leftLoc = ((Chest) doubleChest.getLeftSide()).getLocation();
-                Location rightLoc = ((Chest) doubleChest.getRightSide()).getLocation();
+                Location leftLoc = ((Chest) Objects.requireNonNull(doubleChest.getLeftSide())).getLocation();
+                Location rightLoc = ((Chest) Objects.requireNonNull(doubleChest.getRightSide())).getLocation();
 
                 return shopChestLoc.equals(leftLoc) || shopChestLoc.equals(rightLoc);
             }

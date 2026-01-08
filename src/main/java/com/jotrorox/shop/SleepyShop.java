@@ -20,16 +20,14 @@ public final class SleepyShop extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ShopListener(shopManager), this);
         Bukkit.getPluginManager().registerEvents(new SignListener(shopManager), this);
 
-        getLogger().info("SleepyShop has been enabled! Made by Jotrorox and RelaxoGames.");
+        getLogger().info("SleepyShop has been enabled! Made by the RelaxoGames Development Team.");
 
         (new UpdateChecker(this, "Jotrorox/SleepyShop")).performCheck();
     }
 
     @Override
     public void onDisable() {
-        if (databaseManager != null) {
-            databaseManager.closeConnection();
-        }
+        databaseManager.closeConnection();
     }
 
     public DatabaseManager getDatabaseManager() {

@@ -3,7 +3,6 @@ package com.jotrorox.shop.listener;
 import com.jotrorox.shop.util.UpdateChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
@@ -12,16 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-public class UpdateCheckListener implements Listener {
-
-    private final Plugin plugin;
-    private final UpdateChecker.VersionResult versionResult;
-
-    public UpdateCheckListener(Plugin plugin, UpdateChecker.VersionResult versionResult) {
-        this.plugin = plugin;
-        this.versionResult = versionResult;
-    }
-
+public record UpdateCheckListener(Plugin plugin, UpdateChecker.VersionResult versionResult) implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();

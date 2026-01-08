@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ShopGuiProvider {
 
@@ -29,14 +30,14 @@ public class ShopGuiProvider {
     public void openOwnerGui(Player player, Shop shop) {
         Inventory inv = createBaseGui(shop, 27, OWNER_GUI_TITLE);
 
-        inv.setItem(11, createGuiItem(Material.GOLD_INGOT, "Price Settings", NamedTextColor.GOLD,
+        inv.setItem(11, createGuiSpacer(Material.GOLD_INGOT, "Price Settings", NamedTextColor.GOLD,
                 "Set output and take amounts"));
         inv.setItem(13,
-                createGuiItem(Material.CHEST, "Item Settings", NamedTextColor.AQUA, "Set sell and payment items"));
+                createGuiSpacer(Material.CHEST, "Item Settings", NamedTextColor.AQUA, "Set sell and payment items"));
         inv.setItem(15,
-                createGuiItem(Material.REPEATER, "Other Settings", NamedTextColor.GRAY, "Under construction..."));
+                createGuiSpacer(Material.REPEATER, "Other Settings", NamedTextColor.GRAY, "Under construction..."));
 
-        inv.setItem(26, createGuiItem(Material.BARRIER, "Disband Shop", NamedTextColor.RED));
+        inv.setItem(26, createGuiSpacer(Material.BARRIER, "Disband Shop", NamedTextColor.RED));
 
         player.openInventory(inv);
     }
@@ -45,32 +46,32 @@ public class ShopGuiProvider {
         Inventory inv = createBaseGui(shop, 36, PRICE_GUI_TITLE);
 
         // Take Amount (Price) - Row 1
-        inv.setItem(10, createGuiItem(Material.RED_STAINED_GLASS_PANE, "-10 Price", NamedTextColor.RED));
-        inv.setItem(11, createGuiItem(Material.PINK_STAINED_GLASS_PANE, "-1 Price", NamedTextColor.LIGHT_PURPLE));
+        inv.setItem(10, createGuiSpacer(Material.RED_STAINED_GLASS_PANE, "-10 Price", NamedTextColor.RED));
+        inv.setItem(11, createGuiSpacer(Material.PINK_STAINED_GLASS_PANE, "-1 Price", NamedTextColor.LIGHT_PURPLE));
 
-        ItemStack priceStatus = createGuiItem(Material.GOLD_INGOT, "Current Price: " + shop.getTakeAmount(),
+        ItemStack priceStatus = createGuiSpacer(Material.GOLD_INGOT, "Current Price: " + shop.getTakeAmount(),
                 NamedTextColor.GOLD);
         ItemMeta priceMeta = priceStatus.getItemMeta();
         priceMeta.lore(List.of(Component.text("This is what buyers pay per purchase", NamedTextColor.GRAY)));
         priceStatus.setItemMeta(priceMeta);
         inv.setItem(13, priceStatus);
 
-        inv.setItem(15, createGuiItem(Material.LIME_STAINED_GLASS_PANE, "+1 Price", NamedTextColor.GREEN));
-        inv.setItem(16, createGuiItem(Material.GREEN_STAINED_GLASS_PANE, "+10 Price", NamedTextColor.DARK_GREEN));
+        inv.setItem(15, createGuiSpacer(Material.LIME_STAINED_GLASS_PANE, "+1 Price", NamedTextColor.GREEN));
+        inv.setItem(16, createGuiSpacer(Material.GREEN_STAINED_GLASS_PANE, "+10 Price", NamedTextColor.DARK_GREEN));
 
         // Output Amount - Row 2
-        inv.setItem(19, createGuiItem(Material.RED_STAINED_GLASS_PANE, "-10 Amount", NamedTextColor.RED));
-        inv.setItem(20, createGuiItem(Material.PINK_STAINED_GLASS_PANE, "-1 Amount", NamedTextColor.LIGHT_PURPLE));
+        inv.setItem(19, createGuiSpacer(Material.RED_STAINED_GLASS_PANE, "-10 Amount", NamedTextColor.RED));
+        inv.setItem(20, createGuiSpacer(Material.PINK_STAINED_GLASS_PANE, "-1 Amount", NamedTextColor.LIGHT_PURPLE));
 
-        ItemStack amountStatus = createGuiItem(Material.CHEST, "Current Amount: " + shop.getOutputAmount(),
+        ItemStack amountStatus = createGuiSpacer(Material.CHEST, "Current Amount: " + shop.getOutputAmount(),
                 NamedTextColor.AQUA);
         ItemMeta amountMeta = amountStatus.getItemMeta();
         amountMeta.lore(List.of(Component.text("This is what buyers receive per purchase", NamedTextColor.GRAY)));
         amountStatus.setItemMeta(amountMeta);
         inv.setItem(22, amountStatus);
 
-        inv.setItem(24, createGuiItem(Material.LIME_STAINED_GLASS_PANE, "+1 Amount", NamedTextColor.GREEN));
-        inv.setItem(25, createGuiItem(Material.GREEN_STAINED_GLASS_PANE, "+10 Amount", NamedTextColor.DARK_GREEN));
+        inv.setItem(24, createGuiSpacer(Material.LIME_STAINED_GLASS_PANE, "+1 Amount", NamedTextColor.GREEN));
+        inv.setItem(25, createGuiSpacer(Material.GREEN_STAINED_GLASS_PANE, "+10 Amount", NamedTextColor.DARK_GREEN));
 
         inv.setItem(31, createBackItem());
         player.openInventory(inv);
@@ -122,19 +123,19 @@ public class ShopGuiProvider {
 
         // Shop Name
         String currentName = shop.getShopName() != null ? shop.getShopName() : "None (Default)";
-        inv.setItem(13, createGuiItem(Material.NAME_TAG, "Set Shop Name", NamedTextColor.GOLD,
+        inv.setItem(13, createGuiSpacer(Material.NAME_TAG, "Set Shop Name", NamedTextColor.GOLD,
                 "Current: " + currentName, "Click to change name in chat"));
 
         // Toggle Hologram
         Material holoMaterial = shop.isShowDisplay() ? Material.LIME_DYE : Material.GRAY_DYE;
         String holoStatus = shop.isShowDisplay() ? "Enabled" : "Disabled";
-        inv.setItem(11, createGuiItem(holoMaterial, "Floating Text", NamedTextColor.YELLOW,
+        inv.setItem(11, createGuiSpacer(holoMaterial, "Floating Text", NamedTextColor.YELLOW,
                 "Status: " + holoStatus, "Click to toggle shop display"));
 
         // Toggle Stock Warning
         Material stockMaterial = shop.isShowStockMessage() ? Material.PAPER : Material.BARRIER;
         String stockStatus = shop.isShowStockMessage() ? "Enabled" : "Disabled";
-        inv.setItem(15, createGuiItem(stockMaterial, "Out of Stock Warning", NamedTextColor.YELLOW,
+        inv.setItem(15, createGuiSpacer(stockMaterial, "Out of Stock Warning", NamedTextColor.YELLOW,
                 "Status: " + stockStatus, "Click to toggle 'OUT OF STOCK' message"));
 
         inv.setItem(18, createBackItem());
@@ -157,6 +158,7 @@ public class ShopGuiProvider {
             return;
         }
 
+        assert holder != null;
         holder.setTransactionCount(1);
 
         // Set up the GUI items
@@ -171,15 +173,15 @@ public class ShopGuiProvider {
 
     private void setupBuyerGuiItems(Inventory inv, Shop shop, int transactionCount, int maxTransactions) {
         // Fill with dark glass for clean look
-        ItemStack filler = createGuiItem(Material.BLACK_STAINED_GLASS_PANE, " ");
+        ItemStack filler = createGuiSpacer(Material.BLACK_STAINED_GLASS_PANE);
         for (int i = 0; i < inv.getSize(); i++) {
             inv.setItem(i, filler);
         }
 
         // Transaction controls - centered in top row
-        inv.setItem(2, createGuiItem(Material.RED_STAINED_GLASS_PANE, "-10", NamedTextColor.RED,
+        inv.setItem(2, createGuiSpacer(Material.RED_STAINED_GLASS_PANE, "-10", NamedTextColor.RED,
                 "Decrease by 10"));
-        inv.setItem(3, createGuiItem(Material.ORANGE_STAINED_GLASS_PANE, "-1", NamedTextColor.GOLD,
+        inv.setItem(3, createGuiSpacer(Material.ORANGE_STAINED_GLASS_PANE, "-1", NamedTextColor.GOLD,
                 "Decrease by 1"));
 
         // Transaction count display (paper with stack amount showing count)
@@ -208,16 +210,16 @@ public class ShopGuiProvider {
         countDisplay.setItemMeta(countMeta);
         inv.setItem(4, countDisplay);
 
-        inv.setItem(5, createGuiItem(Material.LIME_STAINED_GLASS_PANE, "+1", NamedTextColor.GREEN,
+        inv.setItem(5, createGuiSpacer(Material.LIME_STAINED_GLASS_PANE, "+1", NamedTextColor.GREEN,
                 "Increase by 1"));
-        inv.setItem(6, createGuiItem(Material.GREEN_STAINED_GLASS_PANE, "+10", NamedTextColor.DARK_GREEN,
+        inv.setItem(6, createGuiSpacer(Material.GREEN_STAINED_GLASS_PANE, "+10", NamedTextColor.DARK_GREEN,
                 "Increase by 10"));
 
         // Item display - middle row, centered
         ItemStack displayItem = shop.getSellItem().clone();
         displayItem.setAmount(shop.getOutputAmount());
         ItemMeta meta = displayItem.getItemMeta();
-        List<Component> lore = meta.hasLore() ? new ArrayList<>(meta.lore()) : new ArrayList<>();
+        List<Component> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.lore())) : new ArrayList<>();
         lore.add(Component.text(""));
         lore.add(Component.text("▸ You get " + shop.getOutputAmount() + " per transaction", NamedTextColor.AQUA)
                 .decoration(TextDecoration.ITALIC, false));
@@ -230,13 +232,13 @@ public class ShopGuiProvider {
         inv.setItem(13, displayItem);
 
         // Confirm button - bottom row, centered
-        ItemStack confirmButton = createGuiItem(Material.EMERALD_BLOCK, "✔ Confirm Purchase", NamedTextColor.GREEN,
+        ItemStack confirmButton = createGuiSpacer(Material.EMERALD_BLOCK, "✔ Confirm Purchase", NamedTextColor.GREEN,
                 "",
                 "Click to buy " + transactionCount + " transaction" + (transactionCount > 1 ? "s" : ""));
         inv.setItem(22, confirmButton);
 
         // Cancel button
-        inv.setItem(18, createGuiItem(Material.BARRIER, "✖ Cancel", NamedTextColor.RED));
+        inv.setItem(18, createGuiSpacer(Material.BARRIER, "✖ Cancel", NamedTextColor.RED));
     }
 
     private int calculateMaxTransactions(Shop shop) {
@@ -261,7 +263,7 @@ public class ShopGuiProvider {
 
     private Inventory createBaseGui(Shop shop, int size, String title) {
         Inventory inv = Bukkit.createInventory(new ShopInventoryHolder(shop, title), size, Component.text(title));
-        ItemStack filler = createGuiItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+        ItemStack filler = createGuiSpacer(Material.GRAY_STAINED_GLASS_PANE);
         for (int i = 0; i < size; i++) {
             inv.setItem(i, filler);
         }
@@ -269,14 +271,14 @@ public class ShopGuiProvider {
     }
 
     private ItemStack createBackItem() {
-        return createGuiItem(Material.ARROW, "Back", NamedTextColor.RED);
+        return createGuiSpacer(Material.ARROW, "Back", NamedTextColor.RED);
     }
 
-    private ItemStack createGuiItem(Material material, String name) {
-        return createGuiItem(material, name, NamedTextColor.WHITE);
+    private ItemStack createGuiSpacer(Material material) {
+        return createGuiSpacer(material, " ", NamedTextColor.WHITE);
     }
 
-    private ItemStack createGuiItem(Material material, String name, NamedTextColor color, String... loreLines) {
+    private ItemStack createGuiSpacer(Material material, String name, NamedTextColor color, String... loreLines) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(name, color).decoration(TextDecoration.ITALIC, false));
