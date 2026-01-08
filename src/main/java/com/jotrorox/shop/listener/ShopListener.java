@@ -60,7 +60,7 @@ public class ShopListener implements Listener {
 
         if (manager.isShopSign(loc)) {
             Shop shop = manager.getShop(loc);
-            if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().isOp()) {
+            if (!event.getPlayer().getUniqueId().equals(shop.getOwner()) && !event.getPlayer().hasPermission("sleepyshop.admin")) {
                 event.setCancelled(true);
                 event.getPlayer()
                         .sendMessage(PREFIX.append(Component.text("You cannot break this shop!", NamedTextColor.RED)));
@@ -82,7 +82,7 @@ public class ShopListener implements Listener {
             }
 
             if (associatedShop != null) {
-                if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
+                if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().hasPermission("sleepyshop.admin")) {
                     event.setCancelled(true);
                     event.getPlayer().sendMessage(
                             PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
@@ -117,13 +117,13 @@ public class ShopListener implements Listener {
             }
 
             if (associatedShop != null) {
-                if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().isOp()) {
+                if (!event.getPlayer().getUniqueId().equals(associatedShop.getOwner()) && !event.getPlayer().hasPermission("sleepyshop.admin")) {
                     event.setCancelled(true);
                     event.getPlayer().sendMessage(
                             PREFIX.append(Component.text("This chest belongs to a shop!", NamedTextColor.RED)));
                 }
             } else {
-                if (event.getPlayer().isOp()) {
+                if (event.getPlayer().hasPermission("sleepyshop.admin")) {
                     event.setCancelled(false);
                     return;
                 }

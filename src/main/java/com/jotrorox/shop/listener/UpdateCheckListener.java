@@ -25,7 +25,7 @@ public class UpdateCheckListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (!player.isOp()) return;
+        if (!player.hasPermission("sleepyshop.admin")) return;
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             player.sendMessage("");

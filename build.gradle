@@ -3,7 +3,7 @@ plugins {
     id("com.gradleup.shadow") version "9.3.0"
 }
 
-group = 'com.jotrorox'
+group = 'de.relaxogames'
 version = '0.3'
 
 repositories {
@@ -54,5 +54,3 @@ shadowJar {
         )
     }
 }
-
-build.dependsOn shadowJar

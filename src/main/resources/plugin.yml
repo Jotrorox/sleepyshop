@@ -2,5 +2,13 @@ name: SleepyShop
 version: '0.3'
 main: com.jotrorox.shop.SleepyShop
 api-version: '1.21'
-authors: [ Johannes (jotrorox) Müller <mail@jotrorox.com> ]
-website: https://jotrorox.com
+authors: [
+  Johannes (jotrorox) Müller <mail@jotrorox.com> 
+  RelaxoGames Team <support@relaxogames.de>
+]
+website: https://relaxogames.de
+
+permissions:
+  sleepyshop.admin:
+    description: "Allows you to access the Chests and remove shops if needed"
+    default: op

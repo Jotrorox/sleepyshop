@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -241,8 +243,8 @@ public class ShopGuiProvider {
         if (shop.getSellItem() == null)
             return 0;
 
-        org.bukkit.block.Block chestBlock = shop.getChestLocation().getBlock();
-        if (!(chestBlock.getState() instanceof org.bukkit.block.Chest chest)) {
+        Block chestBlock = shop.getChestLocation().getBlock();
+        if (!(chestBlock.getState() instanceof Chest chest)) {
             return 0;
         }
 
