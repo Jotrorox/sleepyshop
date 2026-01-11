@@ -1,13 +1,12 @@
-package com.jotrorox.shop.gui;
+package de.relaxogames.sleepyshop.gui;
 
-import com.jotrorox.shop.model.Shop;
-import org.bukkit.inventory.DoubleChestInventory;
+import de.relaxogames.sleepyshop.model.Shop;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 public class ShopInventoryHolder implements InventoryHolder {
+
     private final Shop shop;
     private final String title;
     private int transactionCount = 1;
@@ -34,5 +33,7 @@ public class ShopInventoryHolder implements InventoryHolder {
     }
 
     @Override
-    public @NotNull Inventory getInventory() { return null; }
+    public @NotNull Inventory getInventory() {
+        return null;
+    }
 }

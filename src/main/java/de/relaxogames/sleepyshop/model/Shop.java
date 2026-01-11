@@ -1,12 +1,12 @@
-package com.jotrorox.shop.model;
+package de.relaxogames.sleepyshop.model;
 
+import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.UUID;
-
 public class Shop {
+
     private final Location signLocation;
     private final Location chestLocation;
     private final UUID owner;
