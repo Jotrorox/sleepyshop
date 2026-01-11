@@ -1,11 +1,11 @@
 name: SleepyShop
-version: '0.3'
-main: com.jotrorox.shop.SleepyShop
-api-version: '1.21'
+version: "0.4"
+main: de.relaxogames.sleepyshop.SleepyShop
+api-version: "1.21"
 authors: [
-  Johannes (jotrorox) Müller <mail@jotrorox.com> 
-  RelaxoGames Team <support@relaxogames.de>
-]
+    Johannes (jotrorox) Müller <mail@jotrorox.com>
+    RelaxoGames Team <support@relaxogames.de>,
+  ]
 website: https://relaxogames.de
 
 permissions:

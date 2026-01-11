@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'de.relaxogames'
-version = '0.3'
+version = '0.4'
 
 repositories {
     mavenCentral()
@@ -43,7 +43,7 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadow]
     archiveClassifier.set('')
-    
+
     mergeServiceFiles()
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
 
