@@ -133,6 +133,23 @@ public class ShopListener implements Listener {
                             )
                         );
                 } else {
+                    // Drop the sign as an item before removing the shop
+                    Block signBlock = associatedShop
+                        .getSignLocation()
+                        .getBlock();
+                    if (signBlock.getState() instanceof Sign) {
+                        Material signType = signBlock.getType();
+                        ItemStack signItem = getSignDropItem(signType);
+                        if (signItem != null) {
+                            signBlock
+                                .getWorld()
+                                .dropItemNaturally(
+                                    signBlock.getLocation(),
+                                    signItem
+                                );
+                        }
+                        signBlock.setType(Material.AIR);
+                    }
                     manager.removeShop(associatedShop.getSignLocation());
                     event
                         .getPlayer()
@@ -565,6 +582,19 @@ public class ShopListener implements Listener {
             return;
         }
 
+        // Check if chest has enough space for payment items
+        if (totalPaymentAmount > 0 && !hasSpaceForItems(chestInv, payment)) {
+            buyer.sendMessage(
+                PREFIX.append(
+                    Component.text(
+                        "Shop chest is full! Cannot accept payment.",
+                        NamedTextColor.RED
+                    )
+                )
+            );
+            return;
+        }
+
         // Transaction - take payment from buyer and add to chest
         if (totalPaymentAmount > 0) {
             buyer.getInventory().removeItem(payment);
@@ -694,5 +724,52 @@ public class ShopListener implements Listener {
         }
 
         return false;
+    }
+
+    /**
+     * Checks if an inventory has enough space to accept the given items.
+     */
+    private boolean hasSpaceForItems(Inventory inventory, ItemStack items) {
+        int remaining = items.getAmount();
+        int maxStackSize = items.getMaxStackSize();
+
+        for (ItemStack slot : inventory.getContents()) {
+            if (slot == null || slot.getType() == Material.AIR) {
+                // Empty slot can hold up to maxStackSize
+                remaining -= maxStackSize;
+            } else if (slot.isSimilar(items)) {
+                // Partial stack can hold more of the same item
+                remaining -= (maxStackSize - slot.getAmount());
+            }
+            if (remaining <= 0) {
+                return true;
+            }
+        }
+        return remaining <= 0;
+    }
+
+    /**
+     * Gets the appropriate sign item to drop based on the sign block type.
+     */
+    private ItemStack getSignDropItem(Material signType) {
+        String name = signType.name();
+
+        // Normalize wall variants to the base item
+        if (name.endsWith("_WALL_HANGING_SIGN")) {
+            name = name.replace("_WALL_HANGING_SIGN", "_HANGING_SIGN");
+        } else if (name.endsWith("_WALL_SIGN")) {
+            name = name.replace("_WALL_SIGN", "_SIGN");
+        }
+
+        Material base = Material.matchMaterial(name);
+        if (
+            base != null &&
+            (base.name().endsWith("_SIGN") ||
+                base.name().endsWith("_HANGING_SIGN"))
+        ) {
+            return new ItemStack(base);
+        }
+
+        return new ItemStack(Material.OAK_SIGN); // Fallback
     }
 }
