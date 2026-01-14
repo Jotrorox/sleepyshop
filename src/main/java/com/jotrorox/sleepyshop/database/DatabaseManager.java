@@ -1,6 +1,6 @@
-package de.relaxogames.sleepyshop.database;
+package com.jotrorox.sleepyshop.database;
 
-import de.relaxogames.sleepyshop.model.Shop;
+import com.jotrorox.sleepyshop.model.Shop;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
-package de.relaxogames.sleepyshop.listener;
+package com.jotrorox.sleepyshop.listener;
 
-import de.relaxogames.sleepyshop.util.UpdateChecker;
+import com.jotrorox.sleepyshop.util.UpdateChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;

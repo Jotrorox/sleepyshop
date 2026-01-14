@@ -1,7 +1,7 @@
-package de.relaxogames.sleepyshop.listener;
+package com.jotrorox.sleepyshop.listener;
 
-import de.relaxogames.sleepyshop.manager.ShopManager;
-import de.relaxogames.sleepyshop.model.Shop;
+import com.jotrorox.sleepyshop.manager.ShopManager;
+import com.jotrorox.sleepyshop.model.Shop;
 import java.util.Objects;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

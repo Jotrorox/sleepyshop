@@ -1,4 +1,4 @@
-package de.relaxogames.sleepyshop.model;
+package com.jotrorox.sleepyshop.model;
 
 import java.util.UUID;
 import org.bukkit.Location;
@@ -23,7 +23,7 @@ public class Shop {
         this.signLocation = signLocation;
         this.chestLocation = chestLocation;
         this.owner = owner;
-        this.takeAmount = 0;
+        this.takeAmount = 1;
         this.outputAmount = 1;
         this.paymentItem = new ItemStack(Material.DIAMOND);
     }

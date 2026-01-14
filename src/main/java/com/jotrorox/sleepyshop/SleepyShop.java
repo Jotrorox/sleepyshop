@@ -1,10 +1,10 @@
-package de.relaxogames.sleepyshop;
+package com.jotrorox.sleepyshop;
 
-import de.relaxogames.sleepyshop.database.DatabaseManager;
-import de.relaxogames.sleepyshop.listener.ShopListener;
-import de.relaxogames.sleepyshop.listener.SignListener;
-import de.relaxogames.sleepyshop.manager.ShopManager;
-import de.relaxogames.sleepyshop.util.UpdateChecker;
+import com.jotrorox.sleepyshop.database.DatabaseManager;
+import com.jotrorox.sleepyshop.listener.ShopListener;
+import com.jotrorox.sleepyshop.listener.SignListener;
+import com.jotrorox.sleepyshop.manager.ShopManager;
+import com.jotrorox.sleepyshop.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,9 +26,7 @@ public final class SleepyShop extends JavaPlugin {
             this
         );
 
-        getLogger().info(
-            "SleepyShop has been enabled! Made by the RelaxoGames Development Team."
-        );
+        getLogger().info("SleepyShop has been enabled! Made by Jotrorox.");
 
         (new UpdateChecker(this, "Jotrorox/SleepyShop")).performCheck();
     }

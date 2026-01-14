@@ -1,7 +1,7 @@
-package de.relaxogames.sleepyshop.manager;
+package com.jotrorox.sleepyshop.manager;
 
-import de.relaxogames.sleepyshop.SleepyShop;
-import de.relaxogames.sleepyshop.model.Shop;
+import com.jotrorox.sleepyshop.SleepyShop;
+import com.jotrorox.sleepyshop.model.Shop;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

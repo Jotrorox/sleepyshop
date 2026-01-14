@@ -1,9 +1,9 @@
-package de.relaxogames.sleepyshop.listener;
+package com.jotrorox.sleepyshop.listener;
 
-import de.relaxogames.sleepyshop.gui.ShopGuiProvider;
-import de.relaxogames.sleepyshop.gui.ShopInventoryHolder;
-import de.relaxogames.sleepyshop.manager.ShopManager;
-import de.relaxogames.sleepyshop.model.Shop;
+import com.jotrorox.sleepyshop.gui.ShopGuiProvider;
+import com.jotrorox.sleepyshop.gui.ShopInventoryHolder;
+import com.jotrorox.sleepyshop.manager.ShopManager;
+import com.jotrorox.sleepyshop.model.Shop;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import java.util.HashMap;
 import java.util.Iterator;

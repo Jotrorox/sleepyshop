@@ -1,6 +1,6 @@
-package de.relaxogames.sleepyshop.gui;
+package com.jotrorox.sleepyshop.gui;
 
-import de.relaxogames.sleepyshop.model.Shop;
+import com.jotrorox.sleepyshop.model.Shop;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

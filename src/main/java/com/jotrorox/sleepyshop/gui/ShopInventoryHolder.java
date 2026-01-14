@@ -1,6 +1,6 @@
-package de.relaxogames.sleepyshop.gui;
+package com.jotrorox.sleepyshop.gui;
 
-import de.relaxogames.sleepyshop.model.Shop;
+import com.jotrorox.sleepyshop.model.Shop;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;

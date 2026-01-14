@@ -1,8 +1,8 @@
-package de.relaxogames.sleepyshop.util;
+package com.jotrorox.sleepyshop.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import de.relaxogames.sleepyshop.listener.UpdateCheckListener;
+import com.jotrorox.sleepyshop.listener.UpdateCheckListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
