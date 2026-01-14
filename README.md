@@ -1,5 +1,3 @@
-# --- This plugin moved to another place, I will continue maintaining it there so please check it out at https://github.com/RelaxoGames-de/sleepyshop ---
-
 # 💤 SleepyShop
 
 A simple but effective ChestShop system that doesn't depend on big economy systems but uses items for trading. Perfect for survival servers that want a more "vanilla-plus" trading experience.
