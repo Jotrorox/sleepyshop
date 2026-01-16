@@ -336,7 +336,17 @@ public class ShopListener implements Listener {
                 else if (slot == 26) {
                     // Disband
                     manager.removeShop(shop.getSignLocation());
-                    shop.getSignLocation().getBlock().setType(Material.AIR);
+                    var signBlock = shop.getSignLocation().getBlock();
+                    if (signBlock.getState() instanceof Sign) {
+                        Material signType = signBlock.getType();
+                        ItemStack signItem = getSignDropItem(signType);
+                        signBlock.getWorld()
+                                .dropItemNaturally(
+                                        signBlock.getLocation(),
+                                        signItem
+                                );
+                        signBlock.setType(Material.AIR);
+                    }
                     player.closeInventory();
                     player.sendMessage(
                         PREFIX.append(
