@@ -14,7 +14,7 @@ A simple but effective ChestShop system that doesn't depend on big economy syste
 *   **Intuitive GUI:** Manage your shop through a clean, easy-to-use interface.
 *   **Floating Displays:** Real-time information displays above your chests showing stock and prices.
 *   **Customization:** Set custom shop names and toggle stock warnings.
-*   **Lightweight & Fast:** Built with SQLite and asynchronous database operations to keep your server lag-free.
+*   **Lightweight & Fast:** Built with H2 (single-file) and asynchronous database operations to keep your server lag-free.
 
 ## 🚀 Getting Started
 
