@@ -1,5 +1,6 @@
 package com.jotrorox.sleepyshop.listener;
 
+import com.jotrorox.sleepyshop.SleepyShop;
 import com.jotrorox.sleepyshop.manager.ShopManager;
 import com.jotrorox.sleepyshop.model.Shop;
 import java.util.Objects;
@@ -7,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
@@ -14,7 +16,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
-public record SignListener(ShopManager manager) implements Listener {
+public record SignListener(ShopManager manager, SleepyShop plugin)
+    implements Listener {
     private static final Component PREFIX = Component.text(
         "[SleepyShop] ",
         NamedTextColor.BLUE
@@ -31,6 +34,20 @@ public record SignListener(ShopManager manager) implements Listener {
         ) {
             Block signBlock = event.getBlock();
             Block chestBlock = findAttachedChest(signBlock);
+
+            if (!isWithinPlacementRadius(signBlock)) {
+                event
+                    .getPlayer()
+                    .sendMessage(
+                        PREFIX.append(
+                            Component.text(
+                                "You can only create shops within the placement radius.",
+                                NamedTextColor.RED
+                            )
+                        )
+                    );
+                return;
+            }
 
             if (chestBlock == null) {
                 event
@@ -98,5 +115,19 @@ public record SignListener(ShopManager manager) implements Listener {
             block.getType() == Material.TRAPPED_CHEST ||
             block.getType() == Material.BARREL
         );
+    }
+
+    private boolean isWithinPlacementRadius(Block signBlock) {
+        int placementRadius = plugin.getConfig().getInt("placement-radius", -1);
+        if (placementRadius < 0) {
+            return true;
+        }
+
+        World world = signBlock.getWorld();
+
+        double distance = world
+            .getSpawnLocation()
+            .distance(signBlock.getLocation());
+        return distance <= placementRadius;
     }
 }

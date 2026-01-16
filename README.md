@@ -40,6 +40,11 @@ shop-display:
   out-of-stock: "OUT OF STOCK"
 ```
 
+Placement radius (distance from world spawn) can be configured to restrict where shops are created:
+```yaml
+placement-radius: -1 # -1 = no restriction, >0 = max distance from world spawn
+```
+
 ## 📦 Requirements
 
 *   **Java 21** or higher.

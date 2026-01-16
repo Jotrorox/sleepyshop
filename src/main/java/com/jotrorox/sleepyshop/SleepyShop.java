@@ -22,7 +22,7 @@ public final class SleepyShop extends JavaPlugin {
             this
         );
         Bukkit.getPluginManager().registerEvents(
-            new SignListener(shopManager),
+            new SignListener(shopManager, this),
             this
         );
 

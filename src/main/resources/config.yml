@@ -16,3 +16,7 @@ shop-display:
 
 # Default shop name if none is set
 default-shop-name: "{owner}'s Shop"
+
+# Placement radius from the world spawn (center) where shops can be created.
+# Set to -1 to allow placement anywhere.
+placement-radius: -1

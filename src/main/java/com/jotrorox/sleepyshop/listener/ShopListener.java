@@ -140,14 +140,12 @@ public class ShopListener implements Listener {
                     if (signBlock.getState() instanceof Sign) {
                         Material signType = signBlock.getType();
                         ItemStack signItem = getSignDropItem(signType);
-                        if (signItem != null) {
-                            signBlock
-                                .getWorld()
-                                .dropItemNaturally(
+                        signBlock
+                            .getWorld()
+                            .dropItemNaturally(
                                     signBlock.getLocation(),
                                     signItem
-                                );
-                        }
+                            );
                         signBlock.setType(Material.AIR);
                     }
                     manager.removeShop(associatedShop.getSignLocation());
