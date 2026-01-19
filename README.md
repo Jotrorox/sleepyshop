@@ -8,7 +8,7 @@ A simple but effective ChestShop system that doesn't depend on big economy syste
 
 ---
 
-## ✨ Features
+## Features
 
 *   **Item-Based Economy:** No complex money plugins needed. Trade items for items (e.g., Diamonds for Wood).
 *   **Intuitive GUI:** Manage your shop through a clean, easy-to-use interface.
@@ -16,7 +16,7 @@ A simple but effective ChestShop system that doesn't depend on big economy syste
 *   **Customization:** Set custom shop names and toggle stock warnings.
 *   **Lightweight & Fast:** Built with H2 (single-file) and asynchronous database operations to keep your server lag-free.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Creating a Shop
 1.  Place a **Chest**, **Trapped Chest**, or **Barrel**.
@@ -45,11 +45,11 @@ Placement radius (distance from world spawn) can be configured to restrict where
 placement-radius: -1 # -1 = no restriction, >0 = max distance from world spawn
 ```
 
-## 📦 Requirements
+## Requirements
 
 *   **Java 21** or higher.
 *   **Paper** or a Paper-compatible server (1.21+).
 
 ---
 
-*Made with ❤️ by Johannes ([Jotrorox](https://jotrorox.com)) Müller*
+*Made by Johannes ([Jotrorox](https://jotrorox.com)) Müller*
