@@ -29,7 +29,7 @@ A simple but effective ChestShop system that doesn't depend on big economy syste
 *   **Item Settings:** Simply click with an item in your cursor to set what you are selling or what you accept as payment.
 *   **Other Settings:** Toggle the floating display or change your shop's name.
 
-## 🛠 Configuration
+## Configuration
 
 SleepyShop is highly customizable via the `config.yml`. You can change how the floating text looks using MiniMessage formatting:
 ```yaml
